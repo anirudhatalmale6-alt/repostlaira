@@ -8,6 +8,7 @@ import extractRoutes from './routes/extract';
 import authRoutes from './routes/auth';
 import subscriptionRoutes from './routes/subscription';
 import adminRoutes from './routes/admin';
+import paymentRoutes from './routes/payment';
 
 const app = express();
 
@@ -20,7 +21,14 @@ app.use(cors({
   origin: config.cors.origins.includes('*') ? true : config.cors.origins,
   credentials: true,
 }));
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({
+  limit: '1mb',
+  verify: (req: any, _res, buf) => {
+    if (req.originalUrl === '/api/payment/stripe/webhook') {
+      req.rawBody = buf;
+    }
+  },
+}));
 app.use(generalRateLimit);
 
 // --- Static files ---
@@ -42,6 +50,7 @@ app.use('/api/extract', extractRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // --- Web app root redirect ---
 app.get('/', (_req, res) => {

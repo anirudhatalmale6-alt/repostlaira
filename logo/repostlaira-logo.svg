@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 160" width="640" height="160">
+  <defs>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <clipPath id="iconClip">
+      <rect x="4" y="4" width="152" height="152" rx="32" ry="32"/>
+    </clipPath>
+  </defs>
+
+  <!-- Dark background -->
+  <rect width="640" height="160" fill="#0f172a"/>
+
+  <!-- === ICON === -->
+  <g>
+    <!-- Rounded square background -->
+    <rect x="4" y="4" width="152" height="152" rx="32" ry="32" fill="url(#iconGrad)"/>
+
+    <g clip-path="url(#iconClip)">
+      <!-- Repost arcs -->
+      <path d="M 124 46 A 46 46 0 0 1 124 114"
+            fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M 36 114 A 46 46 0 0 1 36 46"
+            fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="4.5" stroke-linecap="round"/>
+
+      <!-- R outer shape -->
+      <path fill="white" d="
+        M 38 30
+        L 92 30
+        Q 118 30 118 56
+        Q 118 82 92 82
+        L 76 82
+        L 122 130
+        L 101 130
+        L 58 85
+        L 58 130
+        L 38 130
+        Z
+      "/>
+
+      <!-- Bowl cutout -->
+      <rect x="58" y="42" width="44" height="28" rx="4" fill="url(#iconGrad)"/>
+
+      <!-- Play triangle -->
+      <path d="M 68 46 L 92 56 L 68 66 Z" fill="white"/>
+    </g>
+
+    <rect x="4" y="4" width="152" height="152" rx="32" ry="32" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  </g>
+
+  <!-- === TEXT === -->
+  <text y="106" font-family="'Inter', 'SF Pro Display', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="64" letter-spacing="-1">
+    <tspan x="176" fill="white">Repost</tspan><tspan fill="#3B82F6">Laira</tspan>
+  </text>
+</svg>

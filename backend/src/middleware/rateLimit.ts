@@ -37,9 +37,13 @@ export const extractionRateLimit = rateLimit({
  */
 export const generalRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
+  max: 500,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req: Request) => {
+    const path = req.path;
+    return path.startsWith('/app') || path.startsWith('/admin') || path.startsWith('/public');
+  },
   message: {
     error: 'Too many requests, please try again later.',
   },

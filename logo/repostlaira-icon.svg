@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <clipPath id="roundedBg">
+      <rect x="16" y="16" width="480" height="480" rx="96" ry="96"/>
+    </clipPath>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect x="16" y="16" width="480" height="480" rx="96" ry="96" fill="url(#bgGrad)"/>
+
+  <!-- All content clipped to rounded square -->
+  <g clip-path="url(#roundedBg)">
+
+    <!-- Circular repost arrows (subtle background element) -->
+    <!-- Right arc going downward -->
+    <path d="M 355 145 A 138 138 0 0 1 355 367"
+          fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="14" stroke-linecap="round"/>
+    <!-- Left arc going upward -->
+    <path d="M 157 367 A 138 138 0 0 1 157 145"
+          fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="14" stroke-linecap="round"/>
+
+    <!-- R letter - outer shape -->
+    <path fill="white" d="
+      M 128 96
+      L 290 96
+      Q 362 96 362 178
+      Q 362 260 290 260
+      L 244 260
+      L 384 408
+      L 318 408
+      L 186 268
+      L 186 408
+      L 128 408
+      Z
+    "/>
+
+    <!-- Bowl cutout - rounded rectangle reveals gradient behind -->
+    <rect x="186" y="136" width="136" height="86" rx="12" fill="url(#bgGrad)"/>
+
+    <!-- Play triangle centered in the bowl cutout -->
+    <path d="M 224 150 L 296 179 L 224 208 Z" fill="white"/>
+
+  </g>
+
+  <!-- Subtle border -->
+  <rect x="16" y="16" width="480" height="480" rx="96" ry="96" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+</svg>

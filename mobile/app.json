@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "RepostLaira",
+    "slug": "repostlaira",
+    "version": "1.0.0",
+    "scheme": "repostlaira",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#1a1c24",
+      "resizeMode": "contain"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lairaboost.repostlaira",
+      "infoPlist": {
+        "NSPhotoLibraryAddUsageDescription": "RepostLaira a besoin d'acceder a votre galerie pour enregistrer les medias telecharges.",
+        "NSPhotoLibraryUsageDescription": "RepostLaira a besoin d'acceder a votre galerie pour enregistrer les medias telecharges."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1a1c24"
+      },
+      "package": "com.lairaboost.repostlaira",
+      "permissions": [
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "RepostLaira a besoin d'acceder a vos photos pour enregistrer les medias.",
+          "savePhotosPermission": "RepostLaira a besoin de sauvegarder des medias dans votre galerie.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

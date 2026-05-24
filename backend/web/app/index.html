@@ -1785,13 +1785,15 @@ body {
       });
 
       var data = await res.json();
+      var token = data.token || (data.data && data.data.token);
+      var user = data.user || (data.data && data.data.user);
 
-      if (!res.ok || !data.token) {
+      if (!res.ok || !token) {
         throw new Error(data.message || data.error || 'Erreur d\'authentification');
       }
 
-      setToken(data.token);
-      updateAuthUI(data.user || { email: email });
+      setToken(token);
+      updateAuthUI(user || { email: email });
       closeAuthModal();
       showToast(currentAuthMode === 'login' ? 'Connexion reussie' : 'Compte cree avec succes', 'success');
     } catch (err) {

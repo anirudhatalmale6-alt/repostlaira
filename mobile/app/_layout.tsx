@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '../lib/theme';
+import { initAds } from '../lib/ads';
 
 function TabIcon({ label, focused }: { label: string; focused: boolean }) {
   const iconMap: Record<string, string> = {
-    Accueil: '▶',       // play triangle for home/paste
-    Historique: '⏲',    // clock
-    Reglages: '⚙',     // gear
+    Accueil: '▶',
+    Historique: '⏲',
+    Reglages: '⚙',
   };
   return (
     <View style={styles.tabIconContainer}>
@@ -25,6 +26,10 @@ function TabIcon({ label, focused }: { label: string; focused: boolean }) {
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    initAds();
+  }, []);
+
   return (
     <>
       <StatusBar style="light" backgroundColor={colors.bg} />

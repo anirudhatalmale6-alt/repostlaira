@@ -739,35 +739,31 @@ body {
   margin-right: auto;
 }
 
-/* ===== FEATURES ===== */
+/* ===== FEATURES CAROUSEL ===== */
 .features {
   padding: 40px 0;
 }
+.carousel-wrapper {
+  position: relative;
+  overflow: hidden;
+}
 .features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  gap: 14px;
+  padding: 4px 2px 16px;
+  scroll-behavior: smooth;
 }
-@media (max-width: 768px) {
-  .features { padding: 24px 0; }
-  .features-grid {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    gap: 16px;
-    padding-bottom: 8px;
-  }
-  .features-grid::-webkit-scrollbar { display: none; }
-  .features-grid { -ms-overflow-style: none; scrollbar-width: none; }
-  .feature-card {
-    min-width: 280px;
-    scroll-snap-align: start;
-    flex-shrink: 0;
-  }
-}
+.features-grid::-webkit-scrollbar { display: none; }
+.features-grid { -ms-overflow-style: none; scrollbar-width: none; }
 .feature-card {
-  padding: 28px 24px;
+  min-width: 160px;
+  max-width: 180px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  padding: 20px 16px;
   background: var(--glass);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -776,33 +772,92 @@ body {
   transition: all 0.35s ease;
 }
 .feature-card:hover {
-  transform: translateY(-4px);
   border-color: rgba(59, 130, 246, 0.25);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
-.feature-icon {
-  width: 48px; height: 48px;
-  border-radius: 12px;
+/* Carousel arrows */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-60%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.9);
+  color: #fff;
+  border: none;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+  z-index: 5;
+  font-size: 18px;
+  font-weight: 700;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  transition: all 0.2s ease;
 }
-.feature-icon svg { width: 24px; height: 24px; }
+.carousel-arrow:hover { background: var(--accent-hover); transform: translateY(-60%) scale(1.1); }
+.carousel-arrow.left { left: 4px; }
+.carousel-arrow.right { right: 4px; }
+/* Carousel dots */
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+.carousel-dot.active {
+  background: var(--accent);
+  width: 24px;
+  border-radius: 4px;
+}
+@media (min-width: 769px) {
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+  .feature-card {
+    min-width: unset;
+    max-width: unset;
+  }
+  .carousel-arrow { display: none; }
+  .carousel-dots { display: none; }
+}
+.feature-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.feature-icon svg { width: 20px; height: 20px; }
 .feature-icon.blue { background: rgba(59, 130, 246, 0.12); color: var(--accent); }
 .feature-icon.purple { background: rgba(139, 92, 246, 0.12); color: #a78bfa; }
 .feature-icon.green { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
 .feature-icon.amber { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
 
 .feature-card h3 {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .feature-card p {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-muted);
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 /* ===== PRICING ===== */
@@ -1354,40 +1409,50 @@ body {
       <h2 class="section-title">Pourquoi RepostLaira ?</h2>
       <p class="section-subtitle">La solution la plus simple pour telecharger vos contenus preferes</p>
     </div>
-    <div class="features-grid scroll-reveal">
+    <div class="carousel-wrapper scroll-reveal">
+      <button class="carousel-arrow left" onclick="scrollCarousel(-1)" aria-label="Precedent">&#8249;</button>
+      <div class="features-grid" id="featuresCarousel">
 
-      <div class="feature-card">
-        <div class="feature-icon blue">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+        <div class="feature-card">
+          <div class="feature-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+          </div>
+          <h3>Sans filigrane</h3>
+          <p>Contenu original sans watermark, pur et propre.</p>
         </div>
-        <h3>Sans filigrane</h3>
-        <p>Telechargez sans watermark. Le contenu original, pur et propre.</p>
-      </div>
 
-      <div class="feature-card">
-        <div class="feature-icon purple">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"></path></svg>
+        <div class="feature-card">
+          <div class="feature-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"></path></svg>
+          </div>
+          <h3>Haute qualite</h3>
+          <p>Jusqu'a 4K pour YouTube, qualite max pour chaque plateforme.</p>
         </div>
-        <h3>Haute qualite</h3>
-        <p>Meilleure qualite disponible. Jusqu'a 4K pour YouTube et qualite maximale pour chaque plateforme.</p>
-      </div>
 
-      <div class="feature-card">
-        <div class="feature-icon green">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+        <div class="feature-card">
+          <div class="feature-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          </div>
+          <h3>Multi-plateforme</h3>
+          <p>TikTok, Instagram, YouTube, Twitter et Facebook supportes.</p>
         </div>
-        <h3>Multi-plateforme</h3>
-        <p>5 reseaux sociaux supportes : TikTok, Instagram, YouTube, Twitter et Facebook.</p>
-      </div>
 
-      <div class="feature-card">
-        <div class="feature-icon amber">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        <div class="feature-card">
+          <div class="feature-icon amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          </div>
+          <h3>100% Gratuit</h3>
+          <p>Aucun frais, passez en premium pour un acces illimite.</p>
         </div>
-        <h3>100% Gratuit</h3>
-        <p>Aucun frais, aucune inscription requise. Passez en premium pour un acces illimite.</p>
-      </div>
 
+      </div>
+      <button class="carousel-arrow right" onclick="scrollCarousel(1)" aria-label="Suivant">&#8250;</button>
+      <div class="carousel-dots" id="carouselDots">
+        <button class="carousel-dot active" data-index="0"></button>
+        <button class="carousel-dot" data-index="1"></button>
+        <button class="carousel-dot" data-index="2"></button>
+        <button class="carousel-dot" data-index="3"></button>
+      </div>
     </div>
   </div>
 </section>
@@ -2063,10 +2128,65 @@ body {
     }
   });
 
+  // ===== FEATURES CAROUSEL =====
+
+  var carouselAutoPlay = null;
+
+  window.scrollCarousel = function(dir) {
+    var grid = document.getElementById('featuresCarousel');
+    if (!grid) return;
+    var cardW = grid.querySelector('.feature-card').offsetWidth + 14;
+    grid.scrollBy({ left: dir * cardW, behavior: 'smooth' });
+  };
+
+  function updateCarouselDots() {
+    var grid = document.getElementById('featuresCarousel');
+    var dots = document.querySelectorAll('.carousel-dot');
+    if (!grid || dots.length === 0) return;
+    var cards = grid.querySelectorAll('.feature-card');
+    var scrollLeft = grid.scrollLeft;
+    var cardW = cards[0].offsetWidth + 14;
+    var activeIdx = Math.round(scrollLeft / cardW);
+    if (activeIdx >= dots.length) activeIdx = dots.length - 1;
+    if (activeIdx < 0) activeIdx = 0;
+    dots.forEach(function(d, i) {
+      d.classList.toggle('active', i === activeIdx);
+    });
+  }
+
+  function initCarousel() {
+    var grid = document.getElementById('featuresCarousel');
+    if (!grid) return;
+    grid.addEventListener('scroll', updateCarouselDots);
+
+    var dots = document.querySelectorAll('.carousel-dot');
+    dots.forEach(function(dot) {
+      dot.addEventListener('click', function() {
+        var idx = parseInt(this.getAttribute('data-index'), 10);
+        var cards = grid.querySelectorAll('.feature-card');
+        var cardW = cards[0].offsetWidth + 14;
+        grid.scrollTo({ left: idx * cardW, behavior: 'smooth' });
+      });
+    });
+
+    carouselAutoPlay = setInterval(function() {
+      if (window.innerWidth > 768) return;
+      var cards = grid.querySelectorAll('.feature-card');
+      var cardW = cards[0].offsetWidth + 14;
+      var maxScroll = grid.scrollWidth - grid.clientWidth;
+      if (grid.scrollLeft >= maxScroll - 10) {
+        grid.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        grid.scrollBy({ left: cardW, behavior: 'smooth' });
+      }
+    }, 3000);
+  }
+
   // ===== INIT =====
 
   checkExistingSession();
   initScrollReveal();
+  initCarousel();
 
 })();
 </script>

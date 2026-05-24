@@ -15,9 +15,11 @@ import { extractMedia, getDownloadUrl, type ExtractResponse, type MediaFormat } 
 import { detectPlatform } from '../lib/platform-detect';
 import { downloadMedia, shareMedia, formatFileSize, type DownloadProgress } from '../lib/download';
 import { saveToHistory } from '../lib/storage';
+import { showInterstitial } from '../lib/ads';
 import MediaPreviewCard from '../components/MediaPreviewCard';
 import DownloadButton from '../components/DownloadButton';
 import PlatformBadge from '../components/PlatformBadge';
+import AdBanner from '../components/AdBanner';
 import type { Platform } from '../lib/theme';
 
 type ScreenState = 'loading' | 'preview' | 'error';
@@ -79,6 +81,7 @@ export default function PreviewScreen() {
     const downloadUrl = getDownloadUrl(url, selectedFormat.format_id, data.title);
 
     try {
+      await showInterstitial();
       setDlState('downloading');
       setDlProgress(0);
 
@@ -267,6 +270,7 @@ export default function PreviewScreen() {
           </View>
         )}
       </ScrollView>
+      <AdBanner />
     </SafeAreaView>
   );
 }

@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, platformColors, spacing, borderRadius, fontSize } from '../lib/theme';
 import { detectPlatform, isValidUrl, getPlatformIcon } from '../lib/platform-detect';
 import LinkInput from '../components/LinkInput';
+import AdBanner from '../components/AdBanner';
 import type { Platform } from '../lib/theme';
 
 const platforms: { key: Platform; label: string }[] = [
@@ -142,6 +143,7 @@ export default function HomeScreen() {
           </View>
         </View>
       </ScrollView>
+      <AdBanner />
     </SafeAreaView>
   );
 }

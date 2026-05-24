@@ -138,4 +138,70 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+// --- GET /api/auth/tiktok/callback ---
+router.get('/tiktok/callback', async (req: Request, res: Response): Promise<void> => {
+  const { code, state } = req.query;
+
+  if (!code || state !== 'repostlaira') {
+    res.status(400).send('Authorization failed. Missing code or invalid state.');
+    return;
+  }
+
+  try {
+    const tokenRes = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_key: process.env.TIKTOK_CLIENT_KEY || 'aw1j8mw20p6ovj1s',
+        client_secret: process.env.TIKTOK_CLIENT_SECRET || 'u7emxMzPl1v0Uzct3tvukMiiNc7jaVLf',
+        code: code as string,
+        grant_type: 'authorization_code',
+        redirect_uri: 'https://repost.arialtravel.com/api/auth/tiktok/callback',
+      }),
+    });
+
+    const tokenData = await tokenRes.json() as any;
+    console.log('[auth/tiktok] Token response:', JSON.stringify(tokenData));
+
+    if (tokenData.access_token) {
+      const fs = require('fs');
+      const envPath = '/opt/repostlaira/auto-repost/.env';
+      let envContent = '';
+      try { envContent = fs.readFileSync(envPath, 'utf8'); } catch {}
+
+      if (envContent.includes('TIKTOK_ACCESS_TOKEN=')) {
+        envContent = envContent.replace(/TIKTOK_ACCESS_TOKEN=.*/g, `TIKTOK_ACCESS_TOKEN=${tokenData.access_token}`);
+      } else {
+        envContent += `\nTIKTOK_ACCESS_TOKEN=${tokenData.access_token}\n`;
+      }
+
+      if (tokenData.refresh_token) {
+        if (envContent.includes('TIKTOK_REFRESH_TOKEN=')) {
+          envContent = envContent.replace(/TIKTOK_REFRESH_TOKEN=.*/g, `TIKTOK_REFRESH_TOKEN=${tokenData.refresh_token}`);
+        } else {
+          envContent += `TIKTOK_REFRESH_TOKEN=${tokenData.refresh_token}\n`;
+        }
+      }
+
+      fs.writeFileSync(envPath, envContent);
+
+      res.send(`
+        <html><body style="background:#0f172a;color:white;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
+          <div style="text-align:center;">
+            <h1 style="color:#3B82F6;">TikTok autorise avec succes !</h1>
+            <p>Le token a ete sauvegarde. L'auto-post TikTok est maintenant actif.</p>
+            <p>Vous pouvez fermer cette page.</p>
+          </div>
+        </body></html>
+      `);
+    } else {
+      console.error('[auth/tiktok] Failed to get token:', tokenData);
+      res.status(400).send(`Authorization failed: ${JSON.stringify(tokenData)}`);
+    }
+  } catch (err) {
+    console.error('[auth/tiktok] Callback error:', err);
+    res.status(500).send('TikTok authorization failed. Please try again.');
+  }
+});
+
 export default router;

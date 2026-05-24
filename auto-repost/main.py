@@ -27,7 +27,7 @@ from pathlib import Path
 import config
 from scraper import scrape_videos
 from formatter import format_all_videos
-from poster import post_all_videos
+from poster import post_all_videos, check_rate_limit
 
 logger = logging.getLogger("auto-repost")
 
@@ -207,6 +207,12 @@ def run_pipeline(
         logger.info("=" * 60)
         logger.info("STAGE 3: Posting to Buffer%s", " (DRY RUN)" if dry_run else "")
         logger.info("=" * 60)
+
+        if not dry_run and check_rate_limit():
+            logger.warning("Buffer API rate-limited, skipping posting. Will retry next run.")
+            summary["stages"]["post"] = {"success": True, "total_posts": 0, "message": "Rate-limited, will retry"}
+            summary["finished_at"] = datetime.now(timezone.utc).isoformat()
+            return summary
 
         if dry_run:
             logger.info("DRY RUN MODE - no actual posts will be created")

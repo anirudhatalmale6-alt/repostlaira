@@ -17,7 +17,39 @@ import requests
 
 import config
 
+RATE_LIMIT_FILE = config.BASE_DIR / "rate_limit_until.txt"
+
 logger = logging.getLogger(__name__)
+
+
+def check_rate_limit() -> bool:
+    """Return True if we're currently rate-limited."""
+    if RATE_LIMIT_FILE.exists():
+        try:
+            until = datetime.fromisoformat(RATE_LIMIT_FILE.read_text().strip())
+            if datetime.now(timezone.utc) < until:
+                logger.warning("Rate-limited until %s (in %d seconds)", until.isoformat(), (until - datetime.now(timezone.utc)).total_seconds())
+                return True
+            RATE_LIMIT_FILE.unlink(missing_ok=True)
+        except (ValueError, OSError):
+            RATE_LIMIT_FILE.unlink(missing_ok=True)
+    return False
+
+
+def save_rate_limit(retry_after: int) -> None:
+    """Save rate limit expiry so future runs skip the API."""
+    until = datetime.now(timezone.utc) + timedelta(seconds=retry_after)
+    RATE_LIMIT_FILE.write_text(until.isoformat())
+    logger.info("Rate limit saved: retry after %d seconds (until %s)", retry_after, until.isoformat())
+
+
+def handle_rate_limit_response(resp: requests.Response) -> bool:
+    """Check for 429 response and save rate limit info. Returns True if rate-limited."""
+    if resp.status_code == 429:
+        retry_after = int(resp.headers.get("retry-after", 3600))
+        save_rate_limit(retry_after)
+        return True
+    return False
 
 
 def load_post_log() -> list[dict]:
@@ -67,56 +99,123 @@ def generate_caption(video_info: dict) -> str:
 
 def upload_video_to_buffer(file_path: str) -> str | None:
     """
-    Upload a video file to Buffer's media endpoint.
-    Buffer requires videos to be uploaded first, then referenced in the post.
+    Upload a video file to Buffer via their GraphQL uploadMedia mutation.
+    First gets a signed S3 upload URL, then uploads the file, then confirms.
 
-    Returns the media URL/ID on success, None on failure.
+    Returns the uploaded media URL on success, None on failure.
     """
     if not config.BUFFER_TOKEN:
         logger.error("BUFFER_TOKEN not set")
         return None
 
-    # Buffer uses a media upload endpoint
-    upload_url = "https://api.buffer.com/rpc/composerApiProxy"
+    if check_rate_limit():
+        return _serve_video_locally(file_path)
+
+    file_size = Path(file_path).stat().st_size
+    file_name = Path(file_path).name
+    logger.info("Uploading video to Buffer: %s (%d bytes)", file_name, file_size)
 
     headers = {
         "Authorization": f"Bearer {config.BUFFER_TOKEN}",
+        "Content-Type": "application/json",
     }
 
-    # Try direct file upload approach
-    # Buffer's video upload uses multipart form data
+    # Step 1: Request a signed upload URL from Buffer
+    upload_mutation = """
+    mutation UploadMedia($input: UploadMediaInput!) {
+        uploadMedia(input: $input) {
+            ... on UploadMediaSuccess {
+                uploadUrl
+                uploadHeaders
+                mediaUrl
+                mediaId
+            }
+            ... on UploadMediaError {
+                message
+            }
+        }
+    }
+    """
+
+    variables = {
+        "input": {
+            "organizationId": config.BUFFER_ORG_ID,
+            "contentType": "video/mp4",
+            "fileName": file_name,
+            "fileSize": file_size,
+        }
+    }
+
     try:
-        with open(file_path, "rb") as f:
-            file_size = Path(file_path).stat().st_size
-            logger.info("Uploading video to Buffer: %s (%d bytes)", Path(file_path).name, file_size)
+        resp = requests.post(
+            config.BUFFER_API_URL,
+            headers=headers,
+            json={
+                "operationName": "UploadMedia",
+                "query": upload_mutation,
+                "variables": variables,
+            },
+            timeout=30,
+        )
 
-            # Buffer upload via their upload endpoint
-            upload_resp = requests.post(
-                "https://upload.buffer.com/upload",
-                headers={"Authorization": f"Bearer {config.BUFFER_TOKEN}"},
-                files={"file": (Path(file_path).name, f, "video/mp4")},
-                timeout=120,
-            )
+        if resp.status_code != 200:
+            logger.error("Buffer upload request failed (%d): %s", resp.status_code, resp.text[:500])
+            handle_rate_limit_response(resp)
+            return _serve_video_locally(file_path)
 
-            if upload_resp.status_code == 200:
-                data = upload_resp.json()
-                upload_url = data.get("url") or data.get("uploaded_url") or data.get("location")
-                if upload_url:
-                    logger.info("Video uploaded to Buffer: %s", upload_url)
-                    return upload_url
-                # Some responses embed differently
-                logger.info("Upload response: %s", json.dumps(data)[:500])
-                return data.get("key") or data.get("id") or json.dumps(data)
-            else:
-                logger.error(
-                    "Buffer upload failed (%d): %s",
-                    upload_resp.status_code, upload_resp.text[:500],
+        data = resp.json()
+        upload_data = data.get("data", {}).get("uploadMedia", {})
+
+        if "uploadUrl" in upload_data:
+            # Step 2: Upload file to signed URL
+            upload_url = upload_data["uploadUrl"]
+            upload_headers = upload_data.get("uploadHeaders", {})
+            media_url = upload_data.get("mediaUrl")
+
+            with open(file_path, "rb") as f:
+                put_resp = requests.put(
+                    upload_url,
+                    data=f,
+                    headers={**upload_headers, "Content-Type": "video/mp4"},
+                    timeout=120,
                 )
-                return None
+
+            if put_resp.status_code in (200, 201, 204):
+                logger.info("Video uploaded to Buffer: %s", media_url or upload_url)
+                return media_url or upload_url
+            else:
+                logger.error("S3 upload failed (%d): %s", put_resp.status_code, put_resp.text[:300])
+                return _serve_video_locally(file_path)
+
+        elif "message" in upload_data:
+            logger.warning("Buffer upload mutation error: %s", upload_data["message"])
+            return _serve_video_locally(file_path)
+        else:
+            logger.warning("Unexpected upload response: %s", json.dumps(data)[:500])
+            return _serve_video_locally(file_path)
 
     except requests.RequestException as e:
         logger.error("Failed to upload video to Buffer: %s", e)
-        return None
+        return _serve_video_locally(file_path)
+
+
+def _serve_video_locally(file_path: str) -> str | None:
+    """
+    Fallback: make video accessible via the RepostLaira backend server.
+    Copies video to a public-accessible directory and returns the URL.
+    """
+    import shutil
+
+    file_name = Path(file_path).name
+    public_dir = Path("/opt/repostlaira-backend/public/videos")
+    public_dir.mkdir(parents=True, exist_ok=True)
+
+    dest = public_dir / file_name
+    shutil.copy2(file_path, dest)
+
+    public_url = f"http://198.105.115.219:3010/public/videos/{file_name}"
+    logger.info("Video served locally: %s", public_url)
+    return public_url
 
 
 def create_buffer_post(
@@ -160,6 +259,10 @@ def create_buffer_post(
 
     if not config.BUFFER_TOKEN:
         logger.error("BUFFER_TOKEN not set - cannot post")
+        return None
+
+    if check_rate_limit():
+        logger.error("Skipping %s post: rate-limited", platform)
         return None
 
     headers = {
@@ -260,6 +363,7 @@ def create_buffer_post(
                 "Buffer API request failed (%d): %s",
                 resp.status_code, resp.text[:500],
             )
+            handle_rate_limit_response(resp)
             return None
 
     except requests.RequestException as e:

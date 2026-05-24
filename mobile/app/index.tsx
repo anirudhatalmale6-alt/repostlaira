@@ -6,6 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Linking,
+  FlatList,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,9 +24,28 @@ const platforms: { key: Platform; label: string }[] = [
   { key: 'facebook', label: 'Facebook' },
 ];
 
+const lairaboostServices = [
+  { name: 'TikTok', metrics: 'Followers, Likes, Views', color: '#000000', icon: 'TK' },
+  { name: 'Instagram', metrics: 'Followers, Likes, Views', color: '#E1306C', icon: 'IG' },
+  { name: 'YouTube', metrics: 'Views, Subscribers, Likes', color: '#FF0000', icon: 'YT' },
+  { name: 'Twitter', metrics: 'Followers, Likes, Retweets', color: '#1DA1F2', icon: 'X' },
+  { name: 'Facebook', metrics: 'Followers, Likes, Views', color: '#1877F2', icon: 'FB' },
+  { name: 'Telegram', metrics: 'Members, Views, Reactions', color: '#0088CC', icon: 'TG' },
+  { name: 'Spotify', metrics: 'Plays, Followers, Saves', color: '#1DB954', icon: 'SP' },
+  { name: 'Twitch', metrics: 'Followers, Views, Subs', color: '#9146FF', icon: 'TW' },
+  { name: 'LinkedIn', metrics: 'Followers, Likes, Views', color: '#0A66C2', icon: 'LI' },
+  { name: 'Snapchat', metrics: 'Followers, Views, Score', color: '#FFFC00', icon: 'SC' },
+  { name: 'Reddit', metrics: 'Upvotes, Members, Awards', color: '#FF4500', icon: 'RD' },
+  { name: 'Pinterest', metrics: 'Followers, Pins, Saves', color: '#E60023', icon: 'PI' },
+];
+
 export default function HomeScreen() {
   const router = useRouter();
   const [url, setUrl] = useState('');
+
+  const openLairaboost = useCallback(() => {
+    Linking.openURL('https://lairaboost.com');
+  }, []);
 
   const handleSubmit = useCallback(() => {
     const trimmed = url.trim();
@@ -105,6 +126,46 @@ export default function HomeScreen() {
             onSubmit={handleSubmit}
           />
         </View>
+
+        {/* Lairaboost Services Carousel */}
+        <View style={styles.carouselSection}>
+          <View style={styles.carouselHeader}>
+            <Text style={styles.sectionTitle}>Boostez vos reseaux</Text>
+            <TouchableOpacity onPress={openLairaboost} activeOpacity={0.7}>
+              <Text style={styles.seeAllLink}>Voir tout</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.carouselSubtitle}>
+            Propulse par Lairaboost.com
+          </Text>
+          <FlatList
+            data={lairaboostServices}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.name}
+            contentContainerStyle={styles.carouselList}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.serviceCard}
+                onPress={openLairaboost}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.serviceIconCircle, { backgroundColor: item.color }]}>
+                  <Text style={[
+                    styles.serviceIconText,
+                    item.name === 'Snapchat' && { color: '#000' },
+                  ]}>
+                    {item.icon}
+                  </Text>
+                </View>
+                <Text style={styles.serviceName}>{item.name}</Text>
+                <Text style={styles.serviceMetrics}>{item.metrics}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+
+        <View style={styles.divider} />
 
         {/* Info Cards */}
         <View style={styles.infoSection}>
@@ -234,8 +295,64 @@ const styles = StyleSheet.create({
     fontSize: fontSize.xl,
     fontWeight: '700',
   },
+  carouselSection: {
+    marginTop: spacing.xxl,
+  },
+  carouselHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.xs,
+  },
+  carouselSubtitle: {
+    color: colors.accent,
+    fontSize: fontSize.xs,
+    fontWeight: '600',
+    marginBottom: spacing.lg,
+  },
+  seeAllLink: {
+    color: colors.accent,
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+  },
+  carouselList: {
+    gap: spacing.md,
+    paddingRight: spacing.xl,
+  },
+  serviceCard: {
+    backgroundColor: colors.bgCard,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    width: 120,
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  serviceIconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  serviceIconText: {
+    color: colors.white,
+    fontSize: fontSize.sm,
+    fontWeight: '900',
+  },
+  serviceName: {
+    color: colors.textPrimary,
+    fontSize: fontSize.md,
+    fontWeight: '700',
+  },
+  serviceMetrics: {
+    color: colors.textMuted,
+    fontSize: 10,
+    textAlign: 'center',
+    lineHeight: 14,
+  },
   infoSection: {
-    marginTop: spacing.xxxl,
     gap: spacing.md,
   },
   infoCard: {

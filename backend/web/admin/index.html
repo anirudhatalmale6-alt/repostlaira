@@ -204,6 +204,43 @@ tr:hover td{background:rgba(59,130,246,.03)}
   .stat-card{padding:1rem}
   .stat-value{font-size:1.2rem}
 }
+
+/* ========== ADS SECTION ========== */
+select.form-input{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem}
+select.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+select.form-input option{background:var(--card);color:var(--text)}
+
+/* Ad badge placements */
+.badge-hero_top{background:rgba(59,130,246,.12);color:var(--accent)}
+.badge-between_results{background:rgba(168,85,247,.12);color:var(--purple)}
+.badge-footer{background:rgba(249,115,22,.12);color:var(--orange)}
+.badge-popup{background:rgba(236,72,153,.12);color:var(--pink)}
+.badge-active{background:rgba(34,197,94,.12);color:var(--green)}
+.badge-inactive{background:rgba(100,116,139,.15);color:var(--text3)}
+
+/* Status toggle */
+.toggle-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.35rem .7rem;border-radius:20px;font-size:.72rem;font-weight:600;cursor:pointer;transition:var(--transition);border:1px solid transparent}
+.toggle-btn.active{background:rgba(34,197,94,.12);color:var(--green);border-color:rgba(34,197,94,.15)}
+.toggle-btn.active:hover{background:rgba(34,197,94,.2)}
+.toggle-btn.inactive{background:rgba(100,116,139,.12);color:var(--text3);border-color:rgba(100,116,139,.15)}
+.toggle-btn.inactive:hover{background:rgba(100,116,139,.2)}
+.toggle-dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+
+/* Ad action buttons */
+.btn-edit{background:rgba(59,130,246,.1);color:var(--accent);border:1px solid rgba(59,130,246,.15);border-radius:var(--radius-xs);padding:.4rem .65rem;font-size:.78rem;font-weight:600;transition:var(--transition);display:inline-flex;align-items:center;gap:.3rem}
+.btn-edit:hover{background:rgba(59,130,246,.2);border-color:rgba(59,130,246,.3)}
+.btn-edit svg{width:14px;height:14px}
+.ad-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+
+/* Ad preview in table */
+.ad-thumb{width:80px;height:45px;object-fit:cover;border-radius:var(--radius-xs);border:1px solid var(--border);background:var(--bg)}
+.ad-thumb-placeholder{width:80px;height:45px;border-radius:var(--radius-xs);border:1px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:.65rem}
+
+/* Ad form preview */
+#ad-preview img{max-width:100%;max-height:200px;border-radius:var(--radius-xs);display:block;margin:0 auto}
+
+/* Ads table wider for 9 columns */
+#ads-table-content table{min-width:900px}
 </style>
 </head>
 <body>
@@ -260,6 +297,10 @@ tr:hover td{background:rgba(59,130,246,.03)}
         <div class="nav-item" data-page="autorepost" onclick="navigate('autorepost')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
           Auto-Repost
+        </div>
+        <div class="nav-item" data-page="ads" onclick="navigate('ads')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16V8a2 2 0 0 1 2-2h3l5-4v20l-5-4H4a2 2 0 0 1-2-2z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+          Publicit&eacute;s
         </div>
       </nav>
       <div class="sidebar-footer">
@@ -378,6 +419,63 @@ tr:hover td{background:rgba(59,130,246,.03)}
           <div class="spinner"></div>
         </div>
       </div>
+
+      <!-- ADS/PUBLICITES PAGE -->
+      <div class="page" id="page-ads">
+        <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+          <div>
+            <h2>Publicit&eacute;s</h2>
+            <p>Gestion des banni&egrave;res publicitaires</p>
+          </div>
+          <button class="btn-primary" style="width:auto;padding:.65rem 1.25rem" onclick="showAdForm()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:.35rem"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nouvelle publicit&eacute;
+          </button>
+        </div>
+
+        <!-- Ad Stats -->
+        <div class="stat-grid" id="ads-stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div class="stat-label">Total publicit&eacute;s</div>
+            <div class="stat-value" id="stat-ads-total">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="stat-label">Actives</div>
+            <div class="stat-value" id="stat-ads-active">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div class="stat-label">Impressions totales</div>
+            <div class="stat-value" id="stat-ads-impressions">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </div>
+            <div class="stat-label">Clics totaux</div>
+            <div class="stat-value" id="stat-ads-clicks">--</div>
+          </div>
+        </div>
+
+        <!-- Ads Table -->
+        <div class="glass-card">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Liste des publicit&eacute;s
+          </h3>
+          <div id="ads-table-content">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 </div>
@@ -390,6 +488,81 @@ tr:hover td{background:rgba(59,130,246,.03)}
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeDeleteModal()">Annuler</button>
       <button class="btn-danger" id="confirm-delete-btn" onclick="confirmDelete()">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ad Form Modal -->
+<div class="modal-overlay" id="ad-form-modal">
+  <div class="modal" style="max-width:560px">
+    <h3 id="ad-form-title">Nouvelle publicit&eacute;</h3>
+    <form id="ad-form" onsubmit="submitAdForm(event)">
+      <input type="hidden" id="ad-form-id" value="">
+      <div class="form-group">
+        <label for="ad-title">Titre *</label>
+        <input type="text" id="ad-title" class="form-input" placeholder="Titre de la publicit&eacute;" required>
+      </div>
+      <div class="form-group">
+        <label for="ad-image-url">URL de l'image</label>
+        <input type="url" id="ad-image-url" class="form-input" placeholder="https://exemple.com/banner.jpg" oninput="updateAdPreview()">
+      </div>
+      <div class="form-group">
+        <label for="ad-target-url">URL cible (lien au clic)</label>
+        <input type="url" id="ad-target-url" class="form-input" placeholder="https://exemple.com/landing">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group">
+          <label for="ad-placement">Emplacement *</label>
+          <select id="ad-placement" class="form-input" required>
+            <option value="hero_top">Hero (haut de page)</option>
+            <option value="between_results">Entre les r&eacute;sultats</option>
+            <option value="footer">Pied de page</option>
+            <option value="popup">Popup</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ad-status">Statut</label>
+          <select id="ad-status" class="form-input">
+            <option value="active">Actif</option>
+            <option value="inactive">Inactif</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group">
+          <label for="ad-start-date">Date de d&eacute;but</label>
+          <input type="date" id="ad-start-date" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="ad-end-date">Date de fin</label>
+          <input type="date" id="ad-end-date" class="form-input">
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div class="form-group">
+        <label>Aper&ccedil;u</label>
+        <div id="ad-preview" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;min-height:60px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+          <span style="color:var(--text3);font-size:.85rem">Ajoutez une image pour voir l'aper&ccedil;u</span>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="closeAdForm()">Annuler</button>
+        <button type="submit" class="btn-primary" style="width:auto;padding:.55rem 1.25rem" id="ad-form-submit">Cr&eacute;er</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Ad Confirmation Modal -->
+<div class="modal-overlay" id="delete-ad-modal">
+  <div class="modal">
+    <h3>Supprimer la publicit&eacute;</h3>
+    <p id="delete-ad-modal-text">Voulez-vous vraiment supprimer cette publicit&eacute; ? Cette action est irr&eacute;versible.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeDeleteAdModal()">Annuler</button>
+      <button class="btn-danger" id="confirm-delete-ad-btn" onclick="confirmDeleteAd()">Supprimer</button>
     </div>
   </div>
 </div>
@@ -477,6 +650,7 @@ tr:hover td{background:rgba(59,130,246,.03)}
       case 'users': loadUsers(); break;
       case 'downloads': loadDownloads(); break;
       case 'autorepost': loadAutoRepost(); break;
+      case 'ads': loadAds(); break;
     }
   }
 
@@ -903,10 +1077,258 @@ tr:hover td{background:rgba(59,130,246,.03)}
     if (e.target === this) closeDeleteModal();
   });
 
-  // Keyboard shortcut: Escape closes modal
+  // ========== ADS / PUBLICITES ==========
+  let adsData = [];
+  let deleteAdTargetId = null;
+
+  const placementLabels = {
+    hero_top: 'Hero (haut)',
+    between_results: 'Entre résultats',
+    footer: 'Pied de page',
+    popup: 'Popup'
+  };
+
+  async function loadAds() {
+    const container = document.getElementById('ads-table-content');
+    container.innerHTML = '<div class="spinner"></div>';
+
+    try {
+      const data = await apiRequest('GET', '/api/admin/ads');
+      adsData = data.ads || [];
+
+      // Update stats
+      const totalAds = adsData.length;
+      const activeAds = adsData.filter(function(a) { return a.status === 'active'; }).length;
+      const totalImpressions = adsData.reduce(function(sum, a) { return sum + (a.impressions || 0); }, 0);
+      const totalClicks = adsData.reduce(function(sum, a) { return sum + (a.clicks || 0); }, 0);
+
+      document.getElementById('stat-ads-total').textContent = formatNumber(totalAds);
+      document.getElementById('stat-ads-active').textContent = formatNumber(activeAds);
+      document.getElementById('stat-ads-impressions').textContent = formatNumber(totalImpressions);
+      document.getElementById('stat-ads-clicks').textContent = formatNumber(totalClicks);
+
+      if (adsData.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:3rem"><p style="color:var(--text3)">Aucune publicité créée</p><p style="color:var(--text3);font-size:.85rem;margin-top:.5rem">Cliquez sur "Nouvelle publicité" pour commencer</p></div>';
+        return;
+      }
+
+      var html = '<div class="table-wrap"><table><thead><tr>';
+      html += '<th>Aperçu</th><th>Titre</th><th>Emplacement</th><th>Statut</th><th>Dates</th><th>Impressions</th><th>Clics</th><th>CTR</th><th>Actions</th>';
+      html += '</tr></thead><tbody>';
+
+      for (var i = 0; i < adsData.length; i++) {
+        var ad = adsData[i];
+        var ctr = ad.impressions > 0 ? ((ad.clicks / ad.impressions) * 100).toFixed(2) + '%' : '0%';
+        var startStr = ad.start_date ? formatDateShort(ad.start_date) : '--';
+        var endStr = ad.end_date ? formatDateShort(ad.end_date) : '--';
+        var isExpired = ad.end_date && new Date(ad.end_date) < new Date();
+        var placementCls = 'badge-' + ad.placement;
+
+        html += '<tr>';
+        // Thumbnail
+        if (ad.image_url) {
+          html += '<td><img class="ad-thumb" src="' + escapeHtml(ad.image_url) + '" alt="' + escapeHtml(ad.title) + '" onerror="this.outerHTML=\'<div class=ad-thumb-placeholder>Erreur</div>\'"></td>';
+        } else {
+          html += '<td><div class="ad-thumb-placeholder">Pas d\'image</div></td>';
+        }
+        // Title
+        html += '<td class="td-email">' + escapeHtml(ad.title) + '</td>';
+        // Placement
+        html += '<td><span class="badge ' + placementCls + '">' + escapeHtml(placementLabels[ad.placement] || ad.placement) + '</span></td>';
+        // Status toggle
+        var toggleCls = ad.status === 'active' ? 'active' : 'inactive';
+        var toggleLabel = ad.status === 'active' ? 'Actif' : 'Inactif';
+        html += '<td><button class="toggle-btn ' + toggleCls + '" onclick="toggleAdStatus(\'' + ad.id + '\', \'' + (ad.status === 'active' ? 'inactive' : 'active') + '\')">';
+        html += '<span class="toggle-dot"></span> ' + toggleLabel;
+        if (isExpired) html += ' <span style="font-size:.65rem;opacity:.7">(expiré)</span>';
+        html += '</button></td>';
+        // Dates
+        html += '<td style="font-size:.82rem">' + startStr + '<br>' + endStr + '</td>';
+        // Impressions
+        html += '<td>' + formatNumber(ad.impressions || 0) + '</td>';
+        // Clicks
+        html += '<td>' + formatNumber(ad.clicks || 0) + '</td>';
+        // CTR
+        html += '<td style="font-weight:600;color:var(--accent)">' + ctr + '</td>';
+        // Actions
+        html += '<td><div class="ad-actions">';
+        html += '<button class="btn-edit" onclick="editAd(\'' + ad.id + '\')">';
+        html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+        html += 'Éditer</button>';
+        html += '<button class="btn-delete" onclick="showDeleteAdModal(\'' + ad.id + '\', \'' + escapeHtml(ad.title).replace(/'/g, "\\'") + '\')">';
+        html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+        html += 'Supprimer</button>';
+        html += '</div></td>';
+        html += '</tr>';
+      }
+
+      html += '</tbody></table></div>';
+      container.innerHTML = html;
+    } catch (err) {
+      container.innerHTML = '<div style="text-align:center;color:var(--red);padding:2rem">Erreur: ' + escapeHtml(err.message) + '</div>';
+    }
+  }
+
+  // Show ad form (create mode)
+  function showAdForm() {
+    document.getElementById('ad-form-title').innerHTML = 'Nouvelle publicité';
+    document.getElementById('ad-form-submit').innerHTML = 'Créer';
+    document.getElementById('ad-form-id').value = '';
+    document.getElementById('ad-title').value = '';
+    document.getElementById('ad-image-url').value = '';
+    document.getElementById('ad-target-url').value = '';
+    document.getElementById('ad-placement').value = 'hero_top';
+    document.getElementById('ad-status').value = 'active';
+    document.getElementById('ad-start-date').value = '';
+    document.getElementById('ad-end-date').value = '';
+    document.getElementById('ad-preview').innerHTML = '<span style="color:var(--text3);font-size:.85rem">Ajoutez une image pour voir l\'aperçu</span>';
+    document.getElementById('ad-form-modal').classList.add('show');
+  }
+  window.showAdForm = showAdForm;
+
+  // Edit ad (populate form)
+  function editAd(id) {
+    var ad = adsData.find(function(a) { return a.id === id; });
+    if (!ad) return;
+
+    document.getElementById('ad-form-title').innerHTML = 'Éditer la publicité';
+    document.getElementById('ad-form-submit').innerHTML = 'Enregistrer';
+    document.getElementById('ad-form-id').value = ad.id;
+    document.getElementById('ad-title').value = ad.title || '';
+    document.getElementById('ad-image-url').value = ad.image_url || '';
+    document.getElementById('ad-target-url').value = ad.target_url || '';
+    document.getElementById('ad-placement').value = ad.placement;
+    document.getElementById('ad-status').value = ad.status;
+    document.getElementById('ad-start-date').value = ad.start_date ? ad.start_date.substring(0, 10) : '';
+    document.getElementById('ad-end-date').value = ad.end_date ? ad.end_date.substring(0, 10) : '';
+    updateAdPreview();
+    document.getElementById('ad-form-modal').classList.add('show');
+  }
+  window.editAd = editAd;
+
+  // Close ad form
+  function closeAdForm() {
+    document.getElementById('ad-form-modal').classList.remove('show');
+  }
+  window.closeAdForm = closeAdForm;
+
+  // Update preview
+  function updateAdPreview() {
+    var url = document.getElementById('ad-image-url').value.trim();
+    var preview = document.getElementById('ad-preview');
+    if (url) {
+      preview.innerHTML = '<img src="' + escapeHtml(url) + '" alt="Aperçu" onerror="this.parentElement.innerHTML=\'<span style=color:var(--red);font-size:.85rem>Image invalide ou inaccessible</span>\'">';
+    } else {
+      preview.innerHTML = '<span style="color:var(--text3);font-size:.85rem">Ajoutez une image pour voir l\'aperçu</span>';
+    }
+  }
+  window.updateAdPreview = updateAdPreview;
+
+  // Submit ad form (create or update)
+  async function submitAdForm(e) {
+    e.preventDefault();
+    var id = document.getElementById('ad-form-id').value;
+    var btn = document.getElementById('ad-form-submit');
+    btn.disabled = true;
+    var origText = btn.innerHTML;
+    btn.textContent = 'Enregistrement...';
+
+    var payload = {
+      title: document.getElementById('ad-title').value.trim(),
+      image_url: document.getElementById('ad-image-url').value.trim() || null,
+      target_url: document.getElementById('ad-target-url').value.trim() || null,
+      placement: document.getElementById('ad-placement').value,
+      status: document.getElementById('ad-status').value,
+      start_date: document.getElementById('ad-start-date').value || null,
+      end_date: document.getElementById('ad-end-date').value || null
+    };
+
+    try {
+      if (id) {
+        await apiRequest('PUT', '/api/admin/ads/' + id, payload);
+      } else {
+        await apiRequest('POST', '/api/admin/ads', payload);
+      }
+      closeAdForm();
+      loadAds();
+    } catch (err) {
+      alert('Erreur: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = origText;
+    }
+  }
+  window.submitAdForm = submitAdForm;
+
+  // Toggle ad status
+  async function toggleAdStatus(id, newStatus) {
+    var ad = adsData.find(function(a) { return a.id === id; });
+    if (!ad) return;
+
+    try {
+      await apiRequest('PUT', '/api/admin/ads/' + id, {
+        title: ad.title,
+        image_url: ad.image_url,
+        target_url: ad.target_url,
+        placement: ad.placement,
+        status: newStatus,
+        start_date: ad.start_date ? ad.start_date.substring(0, 10) : null,
+        end_date: ad.end_date ? ad.end_date.substring(0, 10) : null
+      });
+      loadAds();
+    } catch (err) {
+      alert('Erreur: ' + err.message);
+    }
+  }
+  window.toggleAdStatus = toggleAdStatus;
+
+  // Delete ad modal
+  function showDeleteAdModal(id, title) {
+    deleteAdTargetId = id;
+    document.getElementById('delete-ad-modal-text').innerHTML = 'Voulez-vous vraiment supprimer la publicité <strong>' + escapeHtml(title) + '</strong> ? Cette action est irréversible.';
+    document.getElementById('delete-ad-modal').classList.add('show');
+  }
+  window.showDeleteAdModal = showDeleteAdModal;
+
+  function closeDeleteAdModal() {
+    deleteAdTargetId = null;
+    document.getElementById('delete-ad-modal').classList.remove('show');
+  }
+  window.closeDeleteAdModal = closeDeleteAdModal;
+
+  async function confirmDeleteAd() {
+    if (!deleteAdTargetId) return;
+    var btn = document.getElementById('confirm-delete-ad-btn');
+    btn.disabled = true;
+    btn.textContent = 'Suppression...';
+
+    try {
+      await apiRequest('DELETE', '/api/admin/ads/' + deleteAdTargetId);
+      closeDeleteAdModal();
+      loadAds();
+    } catch (err) {
+      alert('Erreur: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Supprimer';
+    }
+  }
+  window.confirmDeleteAd = confirmDeleteAd;
+
+  // Close modals on overlay click
+  document.getElementById('ad-form-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeAdForm();
+  });
+  document.getElementById('delete-ad-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteAdModal();
+  });
+
+  // Keyboard shortcut: Escape closes modals
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
       closeDeleteModal();
+      closeAdForm();
+      closeDeleteAdModal();
     }
   });
 

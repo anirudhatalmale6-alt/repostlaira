@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'http://198.105.115.219:3010';
+const API_BASE_URL = 'https://repost.arialtravel.com';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -62,6 +62,15 @@ export interface ExtractResponse {
 export const extractMedia = async (url: string): Promise<ExtractResponse> => {
   const response = await api.post('/api/extract', { url });
   return response.data.data;
+};
+
+export const getDownloadUrl = (sourceUrl: string, formatId: string, title?: string): string => {
+  const params = new URLSearchParams({
+    url: sourceUrl,
+    format_id: formatId,
+    ...(title ? { title } : {}),
+  });
+  return `${API_BASE_URL}/api/extract/download?${params.toString()}`;
 };
 
 export default api;

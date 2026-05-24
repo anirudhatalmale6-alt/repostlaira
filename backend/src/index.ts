@@ -7,7 +7,7 @@ import { generalRateLimit } from './middleware/rateLimit';
 import extractRoutes from './routes/extract';
 import authRoutes from './routes/auth';
 import subscriptionRoutes from './routes/subscription';
-import adminRoutes from './routes/admin';
+import adminRoutes, { adsPublicRouter } from './routes/admin';
 import paymentRoutes from './routes/payment';
 
 const app = express();
@@ -50,6 +50,7 @@ app.use('/api/extract', extractRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/ads', adsPublicRouter);
 app.use('/api/payment', paymentRoutes);
 
 // --- Web app root redirect ---

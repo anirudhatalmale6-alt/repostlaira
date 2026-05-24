@@ -11,7 +11,7 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing, borderRadius, fontSize } from '../lib/theme';
-import { extractMedia, type ExtractResponse, type MediaFormat } from '../lib/api';
+import { extractMedia, getDownloadUrl, type ExtractResponse, type MediaFormat } from '../lib/api';
 import { detectPlatform } from '../lib/platform-detect';
 import { downloadMedia, shareMedia, formatFileSize, type DownloadProgress } from '../lib/download';
 import { saveToHistory } from '../lib/storage';
@@ -72,11 +72,11 @@ export default function PreviewScreen() {
   const handleDownload = useCallback(async () => {
     if (!data) return;
 
-    const downloadUrl = selectedFormat?.url;
-    if (!downloadUrl) {
+    if (!selectedFormat?.format_id || !url) {
       Alert.alert('Erreur', 'Aucun lien de telechargement disponible.');
       return;
     }
+    const downloadUrl = getDownloadUrl(url, selectedFormat.format_id, data.title);
 
     try {
       setDlState('downloading');

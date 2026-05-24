@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512">
+  <defs>
+    <!-- Main blue-to-purple gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <!-- Phone screen tint -->
+    <linearGradient id="screenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5B9CF6" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#9C5AED" stop-opacity="0.25"/>
+    </linearGradient>
+    <!-- Dark background gradient -->
+    <linearGradient id="darkBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0a2e"/>
+      <stop offset="100%" stop-color="#1a0e3d"/>
+    </linearGradient>
+    <!-- Text gradient matching brand -->
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <!-- Subtle glow behind phone -->
+    <radialGradient id="glow" cx="50%" cy="40%" r="35%">
+      <stop offset="0%" stop-color="#7C3AED" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Phone drop shadow -->
+    <filter id="phoneShadow" x="-10%" y="-5%" width="120%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#3B82F6" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Dark background -->
+  <rect x="0" y="0" width="1024" height="512" rx="32" ry="32" fill="url(#darkBg)"/>
+
+  <!-- Subtle glow behind phone -->
+  <ellipse cx="512" cy="190" rx="280" ry="200" fill="url(#glow)"/>
+
+  <!-- Phone icon centered in upper portion -->
+  <g transform="translate(512, 185)" filter="url(#phoneShadow)">
+    <!-- Phone body with gradient fill -->
+    <rect x="-75" y="-138" width="150" height="276" rx="20" ry="20"
+          fill="url(#bgGrad)" stroke="#ffffff" stroke-width="6" stroke-linejoin="round"/>
+
+    <!-- Phone screen area -->
+    <rect x="-63" y="-112" width="126" height="198" rx="5" ry="5"
+          fill="url(#screenGrad)" stroke="none"/>
+
+    <!-- Phone top speaker -->
+    <rect x="-22" y="-128" width="44" height="4" rx="2" ry="2" fill="#ffffff" opacity="0.45"/>
+
+    <!-- Phone bottom home bar -->
+    <rect x="-22" y="115" width="44" height="4" rx="2" ry="2" fill="#ffffff" opacity="0.45"/>
+
+    <!-- Circular repost arrows on screen -->
+    <g transform="translate(0, -13)">
+      <!-- Top-right arc -->
+      <path d="M 0,-38 A 38,38 0 0,1 33,19"
+            fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+      <!-- Arrowhead top-right -->
+      <polygon points="33,19 40,5 24,10" fill="#ffffff"/>
+
+      <!-- Bottom-left arc -->
+      <path d="M 0,38 A 38,38 0 0,1 -33,-19"
+            fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+      <!-- Arrowhead bottom-left -->
+      <polygon points="-33,-19 -40,-5 -24,-10" fill="#ffffff"/>
+
+      <!-- Play triangle in center -->
+      <polygon points="-7,-10 -7,10 10,0" fill="#ffffff" opacity="0.9"/>
+    </g>
+  </g>
+
+  <!-- "Repost" text below the phone - white, bold -->
+  <text x="512" y="418" text-anchor="middle"
+        font-family="'Helvetica Neue', 'Arial', 'Segoe UI', sans-serif"
+        font-size="68" font-weight="700" letter-spacing="4"
+        fill="#ffffff">
+    Repost
+  </text>
+
+  <!-- "LAIRA" subtle tagline -->
+  <text x="512" y="456" text-anchor="middle"
+        font-family="'Helvetica Neue', 'Arial', 'Segoe UI', sans-serif"
+        font-size="20" font-weight="400" letter-spacing="8"
+        fill="#ffffff" opacity="0.45">
+    LAIRA
+  </text>
+</svg>

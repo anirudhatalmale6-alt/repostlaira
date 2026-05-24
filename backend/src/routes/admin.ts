@@ -192,4 +192,140 @@ router.delete('/users/:id', requireAdmin, async (req: Request, res: Response) =>
   }
 });
 
+// ========== ADS MANAGEMENT ==========
+
+// List all ads (admin)
+router.get('/ads', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const result = await query(
+      'SELECT * FROM ads ORDER BY created_at DESC'
+    );
+    res.json({ ads: result.rows });
+  } catch (err) {
+    console.error('[admin] Ads list error:', err);
+    res.status(500).json({ error: 'Failed to fetch ads' });
+  }
+});
+
+// Create ad (admin)
+router.post('/ads', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { title, image_url, target_url, placement, status, start_date, end_date } = req.body;
+    if (!title || !placement) {
+      res.status(400).json({ error: 'Title and placement are required' });
+      return;
+    }
+    const validPlacements = ['hero_top', 'between_results', 'footer', 'popup'];
+    if (!validPlacements.includes(placement)) {
+      res.status(400).json({ error: 'Invalid placement' });
+      return;
+    }
+    const result = await query(
+      `INSERT INTO ads (title, image_url, target_url, placement, status, start_date, end_date)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [title, image_url || null, target_url || null, placement, status || 'active', start_date || null, end_date || null]
+    );
+    res.json({ success: true, ad: result.rows[0] });
+  } catch (err) {
+    console.error('[admin] Create ad error:', err);
+    res.status(500).json({ error: 'Failed to create ad' });
+  }
+});
+
+// Update ad (admin)
+router.put('/ads/:id', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { title, image_url, target_url, placement, status, start_date, end_date } = req.body;
+    if (!title || !placement) {
+      res.status(400).json({ error: 'Title and placement are required' });
+      return;
+    }
+    const validPlacements = ['hero_top', 'between_results', 'footer', 'popup'];
+    if (!validPlacements.includes(placement)) {
+      res.status(400).json({ error: 'Invalid placement' });
+      return;
+    }
+    const result = await query(
+      `UPDATE ads SET title=$1, image_url=$2, target_url=$3, placement=$4, status=$5, start_date=$6, end_date=$7
+       WHERE id=$8 RETURNING *`,
+      [title, image_url || null, target_url || null, placement, status || 'active', start_date || null, end_date || null, id]
+    );
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Ad not found' });
+      return;
+    }
+    res.json({ success: true, ad: result.rows[0] });
+  } catch (err) {
+    console.error('[admin] Update ad error:', err);
+    res.status(500).json({ error: 'Failed to update ad' });
+  }
+});
+
+// Delete ad (admin)
+router.delete('/ads/:id', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await query('DELETE FROM ads WHERE id=$1 RETURNING id', [id]);
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Ad not found' });
+      return;
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[admin] Delete ad error:', err);
+    res.status(500).json({ error: 'Failed to delete ad' });
+  }
+});
+
+// ========== PUBLIC ADS ENDPOINTS (no auth) ==========
+export const adsPublicRouter = Router();
+
+// Get active ads by placement (public)
+adsPublicRouter.get('/active', async (req: Request, res: Response) => {
+  try {
+    const placement = req.query.placement as string;
+    let sql = `SELECT id, title, image_url, target_url, placement
+               FROM ads
+               WHERE status = 'active'
+               AND (start_date IS NULL OR start_date <= CURRENT_DATE)
+               AND (end_date IS NULL OR end_date >= CURRENT_DATE)`;
+    const params: any[] = [];
+    if (placement) {
+      params.push(placement);
+      sql += ` AND placement = $${params.length}`;
+    }
+    sql += ' ORDER BY created_at DESC';
+    const result = await query(sql, params);
+    res.json({ ads: result.rows });
+  } catch (err) {
+    console.error('[ads] Active ads error:', err);
+    res.status(500).json({ error: 'Failed to fetch ads' });
+  }
+});
+
+// Track ad click (public)
+adsPublicRouter.post('/:id/click', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    await query('UPDATE ads SET clicks = clicks + 1 WHERE id = $1', [id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[ads] Click track error:', err);
+    res.status(500).json({ error: 'Failed to track click' });
+  }
+});
+
+// Track ad impression (public)
+adsPublicRouter.post('/:id/impression', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    await query('UPDATE ads SET impressions = impressions + 1 WHERE id = $1', [id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[ads] Impression track error:', err);
+    res.status(500).json({ error: 'Failed to track impression' });
+  }
+});
+
 export default router;

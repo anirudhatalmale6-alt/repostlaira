@@ -1,13 +1,22 @@
 """
-Buffer API Poster
+Social Media Video Poster
 
-Posts formatted videos to social media via Buffer's GraphQL API.
+Posts formatted videos to social media via direct platform APIs (primary)
+with Buffer GraphQL API as fallback.
+
+Supported platforms:
+  - TikTok: Content Posting API v2
+  - YouTube: Data API v3 (Shorts)
+  - Instagram: Graph API (Reels)
+  - Buffer: GraphQL API (fallback for all platforms)
+
 Creates engaging French captions with travel hashtags.
 Schedules posts with spacing to avoid spam.
 """
 
 import json
 import logging
+import os
 import random
 import time
 from datetime import datetime, timedelta, timezone
@@ -20,6 +29,26 @@ import config
 RATE_LIMIT_FILE = config.BASE_DIR / "rate_limit_until.txt"
 
 logger = logging.getLogger(__name__)
+
+# ─── Direct Platform API Configuration ──────────────────────────────────────
+
+# TikTok Content Posting API
+TIKTOK_ACCESS_TOKEN = os.getenv("TIKTOK_ACCESS_TOKEN", "")
+TIKTOK_CLIENT_KEY = os.getenv("TIKTOK_CLIENT_KEY", "aw1j8mw20p6ovj1s")
+TIKTOK_CLIENT_SECRET = os.getenv("TIKTOK_CLIENT_SECRET", "u7emxMzPl1v0Uzct3tvukMiiNc7jaVLf")
+TIKTOK_API_BASE = "https://open.tiktokapis.com/v2"
+
+# YouTube Data API v3
+YOUTUBE_REFRESH_TOKEN = os.getenv("YOUTUBE_REFRESH_TOKEN", "")
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
+YOUTUBE_UPLOAD_URL = "https://www.googleapis.com/upload/youtube/v3/videos"
+GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
+
+# Instagram Graph API (via Facebook)
+INSTAGRAM_ACCESS_TOKEN = os.getenv("INSTAGRAM_ACCESS_TOKEN", "")
+INSTAGRAM_BUSINESS_ID = os.getenv("INSTAGRAM_BUSINESS_ID", "")
+INSTAGRAM_GRAPH_URL = "https://graph.facebook.com/v19.0"
 
 
 def check_rate_limit() -> bool:
@@ -95,6 +124,529 @@ def generate_caption(video_info: dict) -> str:
     caption = template.format(hashtags=all_hashtags)
 
     return caption.strip()
+
+
+###############################################################################
+# Direct Platform API Posting Methods
+###############################################################################
+
+
+def post_tiktok_direct(video_path: str, caption: str) -> dict | None:
+    """
+    Post a video directly to TikTok using the Content Posting API v2.
+
+    Flow:
+      1. Initialize video upload via POST /v2/post/publish/inbox/video/init/
+      2. Upload video file via the returned upload URL
+      3. TikTok processes and publishes to the creator's inbox
+
+    The video lands in the creator's TikTok inbox for final review/publish.
+
+    Returns:
+        Result dict on success, None on failure.
+    """
+    if not TIKTOK_ACCESS_TOKEN:
+        logger.warning("TIKTOK_ACCESS_TOKEN not set, cannot post directly to TikTok")
+        return None
+
+    file_size = Path(video_path).stat().st_size
+    logger.info("[TikTok Direct] Initiating video upload (%d bytes)", file_size)
+
+    headers = {
+        "Authorization": f"Bearer {TIKTOK_ACCESS_TOKEN}",
+        "Content-Type": "application/json; charset=UTF-8",
+    }
+
+    # Step 1: Initialize the upload
+    init_url = f"{TIKTOK_API_BASE}/post/publish/inbox/video/init/"
+    init_body = {
+        "source_info": {
+            "source": "FILE_UPLOAD",
+            "video_size": file_size,
+            "chunk_size": file_size,  # Single chunk upload
+            "total_chunk_count": 1,
+        },
+    }
+
+    try:
+        resp = requests.post(init_url, headers=headers, json=init_body, timeout=30)
+
+        if resp.status_code != 200:
+            logger.error(
+                "[TikTok Direct] Init failed (%d): %s",
+                resp.status_code, resp.text[:500],
+            )
+            return None
+
+        init_data = resp.json()
+        error_data = init_data.get("error", {})
+        if error_data.get("code") != "ok" and error_data.get("code") is not None:
+            logger.error(
+                "[TikTok Direct] Init error: %s - %s",
+                error_data.get("code"), error_data.get("message"),
+            )
+            return None
+
+        data = init_data.get("data", {})
+        upload_url = data.get("upload_url")
+        publish_id = data.get("publish_id")
+
+        if not upload_url:
+            logger.error("[TikTok Direct] No upload_url in response: %s", json.dumps(init_data)[:500])
+            return None
+
+        logger.info("[TikTok Direct] Got upload URL, publish_id=%s", publish_id)
+
+        # Step 2: Upload the video file
+        with open(video_path, "rb") as f:
+            video_data = f.read()
+
+        upload_headers = {
+            "Content-Range": f"bytes 0-{file_size - 1}/{file_size}",
+            "Content-Type": "video/mp4",
+        }
+
+        upload_resp = requests.put(
+            upload_url,
+            data=video_data,
+            headers=upload_headers,
+            timeout=120,
+        )
+
+        if upload_resp.status_code not in (200, 201, 204):
+            logger.error(
+                "[TikTok Direct] Upload failed (%d): %s",
+                upload_resp.status_code, upload_resp.text[:300],
+            )
+            return None
+
+        logger.info(
+            "[TikTok Direct] Video uploaded successfully! publish_id=%s. "
+            "Video will appear in creator's TikTok inbox for review.",
+            publish_id,
+        )
+
+        return {
+            "platform": "tiktok",
+            "method": "direct_api",
+            "publish_id": publish_id,
+            "status": "uploaded_to_inbox",
+        }
+
+    except requests.RequestException as e:
+        logger.error("[TikTok Direct] Request error: %s", e)
+        return None
+
+
+def _get_youtube_access_token() -> str | None:
+    """
+    Exchange the YouTube refresh token for a fresh access token
+    using Google OAuth2 token endpoint.
+    """
+    if not all([YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET]):
+        return None
+
+    try:
+        resp = requests.post(
+            GOOGLE_TOKEN_URL,
+            data={
+                "client_id": GOOGLE_CLIENT_ID,
+                "client_secret": GOOGLE_CLIENT_SECRET,
+                "refresh_token": YOUTUBE_REFRESH_TOKEN,
+                "grant_type": "refresh_token",
+            },
+            timeout=15,
+        )
+
+        if resp.status_code == 200:
+            token_data = resp.json()
+            access_token = token_data.get("access_token")
+            if access_token:
+                logger.debug("[YouTube Direct] Got fresh access token")
+                return access_token
+
+        logger.error(
+            "[YouTube Direct] Token refresh failed (%d): %s",
+            resp.status_code, resp.text[:300],
+        )
+        return None
+
+    except requests.RequestException as e:
+        logger.error("[YouTube Direct] Token refresh error: %s", e)
+        return None
+
+
+def post_youtube_direct(video_path: str, caption: str) -> dict | None:
+    """
+    Upload a video as a YouTube Short using the YouTube Data API v3.
+
+    Uses resumable upload protocol:
+      1. Get fresh access token via refresh token
+      2. Initiate resumable upload with video metadata
+      3. Upload the video file
+      4. Video is published as a YouTube Short (vertical, < 60s)
+
+    Returns:
+        Result dict on success, None on failure.
+    """
+    access_token = _get_youtube_access_token()
+    if not access_token:
+        logger.warning("[YouTube Direct] Cannot get access token, skipping direct upload")
+        return None
+
+    file_size = Path(video_path).stat().st_size
+    logger.info("[YouTube Direct] Uploading video as Short (%d bytes)", file_size)
+
+    # Extract title from caption (first line, max 100 chars)
+    title_line = caption.split("\n")[0].strip()
+    if len(title_line) > 100:
+        title_line = title_line[:97] + "..."
+
+    # Append #Shorts tag to ensure YouTube recognizes it as a Short
+    description = caption
+    if "#Shorts" not in caption and "#shorts" not in caption:
+        description = caption + "\n\n#Shorts"
+
+    # Video metadata
+    metadata = {
+        "snippet": {
+            "title": title_line,
+            "description": description,
+            "tags": ["ArialTravel", "Travel", "Shorts", "Voyage", "LuxuryTravel"],
+            "categoryId": "19",  # Travel & Events
+        },
+        "status": {
+            "privacyStatus": "public",
+            "selfDeclaredMadeForKids": False,
+            "shortDescription": title_line,
+        },
+    }
+
+    # Step 1: Initiate resumable upload
+    init_headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json; charset=UTF-8",
+        "X-Upload-Content-Type": "video/mp4",
+        "X-Upload-Content-Length": str(file_size),
+    }
+
+    try:
+        init_resp = requests.post(
+            f"{YOUTUBE_UPLOAD_URL}?uploadType=resumable&part=snippet,status",
+            headers=init_headers,
+            json=metadata,
+            timeout=30,
+        )
+
+        if init_resp.status_code != 200:
+            logger.error(
+                "[YouTube Direct] Init failed (%d): %s",
+                init_resp.status_code, init_resp.text[:500],
+            )
+            return None
+
+        upload_url = init_resp.headers.get("Location")
+        if not upload_url:
+            logger.error("[YouTube Direct] No Location header in init response")
+            return None
+
+        logger.info("[YouTube Direct] Got resumable upload URL")
+
+        # Step 2: Upload the video file
+        with open(video_path, "rb") as f:
+            upload_resp = requests.put(
+                upload_url,
+                data=f,
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Content-Type": "video/mp4",
+                    "Content-Length": str(file_size),
+                },
+                timeout=300,  # Large file upload timeout
+            )
+
+        if upload_resp.status_code in (200, 201):
+            video_data = upload_resp.json()
+            video_id = video_data.get("id", "unknown")
+            logger.info(
+                "[YouTube Direct] Video uploaded successfully! video_id=%s, URL=https://youtube.com/shorts/%s",
+                video_id, video_id,
+            )
+            return {
+                "platform": "youtube",
+                "method": "direct_api",
+                "video_id": video_id,
+                "url": f"https://youtube.com/shorts/{video_id}",
+                "status": "published",
+            }
+        else:
+            logger.error(
+                "[YouTube Direct] Upload failed (%d): %s",
+                upload_resp.status_code, upload_resp.text[:500],
+            )
+            return None
+
+    except requests.RequestException as e:
+        logger.error("[YouTube Direct] Request error: %s", e)
+        return None
+
+
+def post_instagram_direct(video_path: str, caption: str) -> dict | None:
+    """
+    Post a video as an Instagram Reel using the Instagram Graph API.
+
+    Flow:
+      1. Upload video to a publicly accessible URL (local server fallback)
+      2. Create a media container with the video URL
+      3. Poll for container status until ready
+      4. Publish the container
+
+    Returns:
+        Result dict on success, None on failure.
+    """
+    if not INSTAGRAM_ACCESS_TOKEN or not INSTAGRAM_BUSINESS_ID:
+        logger.warning("[Instagram Direct] Missing access token or business ID")
+        return None
+
+    logger.info("[Instagram Direct] Posting Reel to account %s", INSTAGRAM_BUSINESS_ID)
+
+    # Instagram requires a publicly accessible video URL.
+    # Use local server to serve the video.
+    video_url = _serve_video_locally(video_path)
+    if not video_url:
+        logger.error("[Instagram Direct] Cannot serve video for Instagram upload")
+        return None
+
+    try:
+        # Step 1: Create media container for Reel
+        container_url = f"{INSTAGRAM_GRAPH_URL}/{INSTAGRAM_BUSINESS_ID}/media"
+        container_params = {
+            "media_type": "REELS",
+            "video_url": video_url,
+            "caption": caption,
+            "share_to_feed": "true",
+            "access_token": INSTAGRAM_ACCESS_TOKEN,
+        }
+
+        resp = requests.post(container_url, data=container_params, timeout=30)
+
+        if resp.status_code != 200:
+            logger.error(
+                "[Instagram Direct] Container creation failed (%d): %s",
+                resp.status_code, resp.text[:500],
+            )
+            return None
+
+        container_data = resp.json()
+        container_id = container_data.get("id")
+
+        if not container_id:
+            logger.error(
+                "[Instagram Direct] No container ID in response: %s",
+                json.dumps(container_data)[:500],
+            )
+            return None
+
+        logger.info("[Instagram Direct] Container created: %s, waiting for processing...", container_id)
+
+        # Step 2: Poll for container status (video processing takes time)
+        status_url = f"{INSTAGRAM_GRAPH_URL}/{container_id}"
+        max_attempts = 30  # Up to 5 minutes (10s intervals)
+        for attempt in range(max_attempts):
+            time.sleep(10)
+
+            status_resp = requests.get(
+                status_url,
+                params={
+                    "fields": "status_code,status",
+                    "access_token": INSTAGRAM_ACCESS_TOKEN,
+                },
+                timeout=15,
+            )
+
+            if status_resp.status_code != 200:
+                logger.warning(
+                    "[Instagram Direct] Status check failed (%d), retrying...",
+                    status_resp.status_code,
+                )
+                continue
+
+            status_data = status_resp.json()
+            status_code = status_data.get("status_code")
+
+            if status_code == "FINISHED":
+                logger.info("[Instagram Direct] Video processing complete")
+                break
+            elif status_code == "ERROR":
+                error_msg = status_data.get("status", "Unknown error")
+                logger.error("[Instagram Direct] Processing error: %s", error_msg)
+                return None
+            elif status_code == "EXPIRED":
+                logger.error("[Instagram Direct] Container expired before publishing")
+                return None
+            else:
+                logger.debug(
+                    "[Instagram Direct] Processing status: %s (attempt %d/%d)",
+                    status_code, attempt + 1, max_attempts,
+                )
+        else:
+            logger.error("[Instagram Direct] Timed out waiting for video processing")
+            return None
+
+        # Step 3: Publish the container
+        publish_url = f"{INSTAGRAM_GRAPH_URL}/{INSTAGRAM_BUSINESS_ID}/media_publish"
+        publish_params = {
+            "creation_id": container_id,
+            "access_token": INSTAGRAM_ACCESS_TOKEN,
+        }
+
+        publish_resp = requests.post(publish_url, data=publish_params, timeout=30)
+
+        if publish_resp.status_code != 200:
+            logger.error(
+                "[Instagram Direct] Publish failed (%d): %s",
+                publish_resp.status_code, publish_resp.text[:500],
+            )
+            return None
+
+        publish_data = publish_resp.json()
+        media_id = publish_data.get("id")
+
+        logger.info(
+            "[Instagram Direct] Reel published successfully! media_id=%s",
+            media_id,
+        )
+
+        return {
+            "platform": "instagram",
+            "method": "direct_api",
+            "media_id": media_id,
+            "status": "published",
+        }
+
+    except requests.RequestException as e:
+        logger.error("[Instagram Direct] Request error: %s", e)
+        return None
+
+
+def post_to_platform(
+    platform: str,
+    video_path: str,
+    caption: str,
+    dry_run: bool = False,
+) -> dict | None:
+    """
+    Post a video to a platform using the best available method.
+
+    Priority:
+      1. Direct platform API (if credentials are configured)
+      2. Buffer GraphQL API (fallback)
+
+    On direct API failure, automatically falls back to Buffer.
+
+    Args:
+        platform: Platform name (tiktok, youtube, instagram)
+        video_path: Path to the formatted video file
+        caption: Post caption text
+        dry_run: If True, log but don't actually post
+
+    Returns:
+        Result dict on success, None on failure.
+    """
+    if dry_run:
+        logger.info(
+            "[DRY RUN] Would post to %s: %s...",
+            platform, caption[:80],
+        )
+        return {
+            "dry_run": True,
+            "platform": platform,
+            "caption": caption[:80],
+            "method": "dry_run",
+        }
+
+    result = None
+
+    # Try direct API first based on platform
+    if platform == "tiktok" and TIKTOK_ACCESS_TOKEN:
+        logger.info("[%s] Attempting direct API posting...", platform)
+        result = post_tiktok_direct(video_path, caption)
+        if result:
+            logger.info("[%s] Direct API posting succeeded", platform)
+            return result
+        else:
+            logger.warning("[%s] Direct API failed, falling back to Buffer", platform)
+
+    elif platform == "youtube" and YOUTUBE_REFRESH_TOKEN:
+        logger.info("[%s] Attempting direct API posting...", platform)
+        result = post_youtube_direct(video_path, caption)
+        if result:
+            logger.info("[%s] Direct API posting succeeded", platform)
+            return result
+        else:
+            logger.warning("[%s] Direct API failed, falling back to Buffer", platform)
+
+    elif platform == "instagram" and INSTAGRAM_ACCESS_TOKEN:
+        logger.info("[%s] Attempting direct API posting...", platform)
+        result = post_instagram_direct(video_path, caption)
+        if result:
+            logger.info("[%s] Direct API posting succeeded", platform)
+            return result
+        else:
+            logger.warning("[%s] Direct API failed, falling back to Buffer", platform)
+
+    else:
+        logger.info(
+            "[%s] No direct API credentials configured, using Buffer",
+            platform,
+        )
+
+    # Fallback: post via Buffer
+    return post_via_buffer(platform, video_path, caption)
+
+
+def post_via_buffer(platform: str, video_path: str, caption: str) -> dict | None:
+    """
+    Post a video via Buffer as fallback.
+    Handles upload to Buffer + creating the Buffer post.
+
+    Returns:
+        Result dict on success, None on failure.
+    """
+    channel = config.BUFFER_CHANNELS.get(platform)
+    if not channel or not channel.get("enabled"):
+        logger.warning("[Buffer Fallback] Channel %s not configured or disabled", platform)
+        return None
+
+    if check_rate_limit():
+        logger.error("[Buffer Fallback] Rate-limited, cannot post to %s", platform)
+        return None
+
+    # Upload video to Buffer
+    media_url = upload_video_to_buffer(video_path)
+    if not media_url:
+        logger.error("[Buffer Fallback] Failed to upload video for %s", platform)
+        return None
+
+    # Create the post
+    result = create_buffer_post(
+        channel_id=channel["id"],
+        channel_name=channel["name"],
+        platform=platform,
+        caption=caption,
+        media_url=media_url,
+        schedule_mode="shareNow" if config.FIRST_POST_IMMEDIATE else "addToQueue",
+    )
+
+    if result:
+        result["method"] = "buffer_fallback"
+
+    return result
+
+
+###############################################################################
+# Buffer API Methods (kept as fallback)
+###############################################################################
 
 
 def upload_video_to_buffer(file_path: str) -> str | None:
@@ -373,7 +925,8 @@ def create_buffer_post(
 
 def post_video(video_info: dict, dry_run: bool = False) -> list[dict]:
     """
-    Post a formatted video to all enabled Buffer channels.
+    Post a formatted video to all enabled platforms.
+    Uses direct platform APIs when available, falls back to Buffer.
     Spaces out posts to avoid spam.
 
     Args:
@@ -393,8 +946,6 @@ def post_video(video_info: dict, dry_run: bool = False) -> list[dict]:
 
     post_results = []
     post_log = load_post_log()
-    is_first = True
-    scheduled_time = datetime.now(timezone.utc)
 
     for platform, file_path in formatted_paths.items():
         channel = config.BUFFER_CHANNELS.get(platform)
@@ -402,31 +953,15 @@ def post_video(video_info: dict, dry_run: bool = False) -> list[dict]:
             logger.debug("Skipping disabled channel: %s", platform)
             continue
 
-        # Upload video to Buffer (unless dry run)
-        media_url = None
-        if not dry_run:
-            media_url = upload_video_to_buffer(file_path)
-            if not media_url:
-                logger.error("Failed to upload video for %s, skipping", platform)
-                continue
-
-        # First post goes out now, subsequent ones are queued with spacing
-        if is_first and config.FIRST_POST_IMMEDIATE:
-            mode = "shareNow"
-            is_first = False
-        else:
-            mode = "addToQueue"
-            is_first = False
-
-        result = create_buffer_post(
-            channel_id=channel["id"],
-            channel_name=channel["name"],
+        # Use unified post_to_platform (direct API primary, Buffer fallback)
+        result = post_to_platform(
             platform=platform,
+            video_path=file_path,
             caption=caption,
-            media_url=media_url,
-            schedule_mode=mode,
             dry_run=dry_run,
         )
+
+        method = "dry_run" if dry_run else (result.get("method", "unknown") if result else "failed")
 
         post_entry = {
             "video_id": video_info.get("id"),
@@ -434,7 +969,7 @@ def post_video(video_info: dict, dry_run: bool = False) -> list[dict]:
             "channel_name": channel["name"],
             "caption": caption,
             "file_path": file_path,
-            "mode": mode,
+            "method": method,
             "success": result is not None,
             "result": result,
             "posted_at": datetime.now(timezone.utc).isoformat(),
@@ -452,7 +987,8 @@ def post_video(video_info: dict, dry_run: bool = False) -> list[dict]:
 
 def post_all_videos(videos: list[dict], dry_run: bool = False) -> list[dict]:
     """
-    Post all formatted videos to Buffer with appropriate spacing.
+    Post all formatted videos to social media with appropriate spacing.
+    Uses direct platform APIs when available, Buffer as fallback.
 
     Args:
         videos: List of video info dicts with formatted_paths.
@@ -501,5 +1037,12 @@ if __name__ == "__main__":
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
     print("Poster module loaded. Use main.py to run the full pipeline.")
-    print(f"Buffer token configured: {'Yes' if config.BUFFER_TOKEN else 'No'}")
-    print(f"Enabled channels: {[n for n, c in config.BUFFER_CHANNELS.items() if c.get('enabled')]}")
+    print()
+    print("=== Direct API Credentials ===")
+    print(f"  TikTok:    {'Configured' if TIKTOK_ACCESS_TOKEN else 'Not set (will use Buffer)'}")
+    print(f"  YouTube:   {'Configured' if YOUTUBE_REFRESH_TOKEN else 'Not set (will use Buffer)'}")
+    print(f"  Instagram: {'Configured' if INSTAGRAM_ACCESS_TOKEN else 'Not set (will use Buffer)'}")
+    print()
+    print("=== Buffer Fallback ===")
+    print(f"  Buffer token: {'Yes' if config.BUFFER_TOKEN else 'No'}")
+    print(f"  Enabled channels: {[n for n, c in config.BUFFER_CHANNELS.items() if c.get('enabled')]}")

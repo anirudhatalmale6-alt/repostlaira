@@ -16,8 +16,12 @@ export const config = {
     expiresIn: process.env.JWT_EXPIRES_IN || '30d',
   },
 
+  admin: {
+    password: process.env.ADMIN_PASSWORD || 'RepostLaira2026!',
+  },
+
   cors: {
-    origins: (process.env.CORS_ORIGINS || 'http://localhost:3000').split(',').map(s => s.trim()),
+    origins: (process.env.CORS_ORIGINS || 'http://localhost:3000,http://198.105.115.219:3010').split(',').map(s => s.trim()),
   },
 
   rateLimit: {

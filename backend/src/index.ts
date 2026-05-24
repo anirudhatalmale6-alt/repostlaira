@@ -1,22 +1,32 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import path from 'path';
 import { config } from './config';
 import { generalRateLimit } from './middleware/rateLimit';
 import extractRoutes from './routes/extract';
 import authRoutes from './routes/auth';
 import subscriptionRoutes from './routes/subscription';
+import adminRoutes from './routes/admin';
 
 const app = express();
 
 // --- Security & Parsing ---
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+  contentSecurityPolicy: false,
+}));
 app.use(cors({
-  origin: config.cors.origins,
+  origin: config.cors.origins.includes('*') ? true : config.cors.origins,
   credentials: true,
 }));
 app.use(express.json({ limit: '1mb' }));
 app.use(generalRateLimit);
+
+// --- Static files ---
+app.use('/public', express.static(path.join(__dirname, '..', 'public')));
+app.use('/admin', express.static(path.join(__dirname, '..', 'web', 'admin')));
+app.use('/app', express.static(path.join(__dirname, '..', 'web', 'app')));
 
 // --- Health Check ---
 app.get('/api/health', (_req, res) => {
@@ -31,6 +41,12 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/extract', extractRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/subscription', subscriptionRoutes);
+app.use('/api/admin', adminRoutes);
+
+// --- Web app root redirect ---
+app.get('/', (_req, res) => {
+  res.redirect('/app');
+});
 
 // --- 404 Handler ---
 app.use((_req, res) => {

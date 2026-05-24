@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RepostLaira - Telechargez vos videos preferees en un clic</title>
+<meta name="description" content="Telechargez vos videos TikTok, Instagram, YouTube, Twitter et Facebook gratuitement et sans filigrane avec RepostLaira.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0f172a;
+  --bg-card: #1e293b;
+  --bg-card-hover: #263347;
+  --accent: #3B82F6;
+  --accent-hover: #2563EB;
+  --accent-glow: rgba(59, 130, 246, 0.25);
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --border: rgba(148, 163, 184, 0.12);
+  --border-light: rgba(148, 163, 184, 0.08);
+  --glass: rgba(30, 41, 59, 0.7);
+  --glass-border: rgba(148, 163, 184, 0.15);
+  --success: #22c55e;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --tiktok: #ff0050;
+  --instagram: #E4405F;
+  --youtube: #FF0000;
+  --twitter: #1DA1F2;
+  --facebook: #1877F2;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== AMBIENT BACKGROUND ===== */
+.ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.08;
+  animation: ambient-float 20s ease-in-out infinite;
+}
+.ambient-orb:nth-child(1) {
+  width: 600px; height: 600px;
+  background: var(--accent);
+  top: -200px; left: -100px;
+  animation-delay: 0s;
+}
+.ambient-orb:nth-child(2) {
+  width: 500px; height: 500px;
+  background: #8b5cf6;
+  bottom: -150px; right: -100px;
+  animation-delay: -7s;
+}
+.ambient-orb:nth-child(3) {
+  width: 400px; height: 400px;
+  background: var(--tiktok);
+  top: 40%; left: 60%;
+  animation-delay: -14s;
+  opacity: 0.04;
+}
+@keyframes ambient-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.05); }
+  66% { transform: translate(-20px, 30px) scale(0.95); }
+}
+
+/* ===== LAYOUT ===== */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== HEADER ===== */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border-bottom: 1px solid var(--border-light);
+}
+.header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+}
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.logo-text {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.logo-text span { color: var(--accent); }
+
+.header-right { display: flex; align-items: center; gap: 12px; }
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.user-email { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-tier {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+.btn-primary:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 4px 20px var(--accent-glow);
+  transform: translateY(-1px);
+}
+.btn-primary:active { transform: translateY(0) scale(0.98); }
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--text);
+  border-color: var(--glass-border);
+}
+.btn-sm { padding: 8px 16px; font-size: 13px; }
+.btn-lg { padding: 14px 32px; font-size: 16px; border-radius: var(--radius-lg); }
+.btn-xl {
+  padding: 16px 40px;
+  font-size: 17px;
+  font-weight: 700;
+  border-radius: var(--radius-lg);
+}
+.btn-download {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #fff;
+  box-shadow: 0 2px 16px rgba(34, 197, 94, 0.3);
+}
+.btn-download:hover {
+  box-shadow: 0 4px 24px rgba(34, 197, 94, 0.4);
+  transform: translateY(-2px);
+}
+
+/* ===== HERO ===== */
+.hero {
+  padding: 80px 0 60px;
+  text-align: center;
+}
+@media (max-width: 640px) { .hero { padding: 48px 0 40px; } }
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 100px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  animation: fadeInDown 0.6s ease;
+}
+.hero-badge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero h1 {
+  font-size: clamp(32px, 5.5vw, 56px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+  margin-bottom: 16px;
+  animation: fadeInDown 0.6s ease 0.1s both;
+}
+.hero h1 .gradient-text {
+  background: linear-gradient(135deg, var(--accent), #8b5cf6, var(--accent));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 4s ease-in-out infinite;
+}
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+}
+
+.hero-subtitle {
+  font-size: clamp(16px, 2.2vw, 19px);
+  color: var(--text-muted);
+  max-width: 580px;
+  margin: 0 auto 40px;
+  font-weight: 400;
+  animation: fadeInDown 0.6s ease 0.2s both;
+}
+
+/* ===== SEARCH BOX ===== */
+.search-box {
+  max-width: 680px;
+  margin: 0 auto 36px;
+  animation: fadeInUp 0.7s ease 0.3s both;
+}
+.search-input-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 6px;
+  transition: all var(--transition);
+  box-shadow: var(--shadow);
+}
+.search-input-wrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: var(--shadow), 0 0 0 4px var(--accent-glow);
+}
+.search-input-wrap input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 16px;
+  padding: 12px 16px;
+  min-width: 0;
+}
+.search-input-wrap input::placeholder { color: var(--text-dim); }
+
+.btn-paste {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.btn-paste:hover { color: var(--accent); background: rgba(59, 130, 246, 0.1); }
+.btn-paste svg { width: 20px; height: 20px; }
+
+.btn-extract {
+  flex-shrink: 0;
+  padding: 12px 28px;
+  border-radius: calc(var(--radius-xl) - 4px);
+  font-size: 15px;
+}
+@media (max-width: 500px) {
+  .search-input-wrap { flex-wrap: wrap; border-radius: var(--radius-lg); padding: 8px; }
+  .search-input-wrap input { width: 100%; padding: 10px 12px; font-size: 15px; }
+  .btn-extract { width: 100%; margin-top: 4px; border-radius: var(--radius); padding: 14px; }
+  .btn-paste { position: absolute; right: 70px; top: 50%; transform: translateY(-50%); }
+  .search-box { position: relative; }
+}
+
+.search-error {
+  margin-top: 12px;
+  color: var(--error);
+  font-size: 14px;
+  font-weight: 500;
+  animation: shake 0.4s ease;
+  display: none;
+}
+.search-error.visible { display: block; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+/* ===== PLATFORMS ===== */
+.platforms {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  animation: fadeInUp 0.7s ease 0.4s both;
+}
+.platform-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  transition: all var(--transition);
+}
+.platform-badge:hover { transform: translateY(-2px); filter: brightness(1.15); }
+.platform-badge svg { width: 16px; height: 16px; }
+.platform-badge.tiktok { background: rgba(255, 0, 80, 0.15); color: var(--tiktok); border: 1px solid rgba(255, 0, 80, 0.25); }
+.platform-badge.instagram { background: rgba(228, 64, 95, 0.15); color: var(--instagram); border: 1px solid rgba(228, 64, 95, 0.25); }
+.platform-badge.youtube { background: rgba(255, 0, 0, 0.15); color: var(--youtube); border: 1px solid rgba(255, 0, 0, 0.25); }
+.platform-badge.twitter { background: rgba(29, 161, 242, 0.15); color: var(--twitter); border: 1px solid rgba(29, 161, 242, 0.25); }
+.platform-badge.facebook { background: rgba(24, 119, 242, 0.15); color: var(--facebook); border: 1px solid rgba(24, 119, 242, 0.25); }
+
+/* ===== LOADING ===== */
+.loading-section {
+  display: none;
+  padding: 60px 0;
+  text-align: center;
+}
+.loading-section.visible { display: block; }
+
+.spinner-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  animation: fadeIn 0.3s ease;
+}
+.spinner {
+  width: 56px; height: 56px;
+  position: relative;
+}
+.spinner::before, .spinner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid transparent;
+}
+.spinner::before {
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+.spinner::after {
+  border-right-color: #8b5cf6;
+  animation: spin 1.2s linear infinite reverse;
+  inset: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 500;
+}
+.loading-dots::after {
+  content: '';
+  animation: dots 1.5s steps(4) infinite;
+}
+@keyframes dots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+}
+
+/* ===== RESULT ===== */
+.result-section {
+  display: none;
+  padding: 20px 0 60px;
+}
+.result-section.visible { display: block; }
+
+.result-card {
+  max-width: 680px;
+  margin: 0 auto;
+  background: var(--glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  animation: fadeInUp 0.5s ease;
+}
+
+.result-thumbnail {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #0c1220;
+  overflow: hidden;
+}
+.result-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.result-card:hover .result-thumbnail img { transform: scale(1.03); }
+.result-platform-tag {
+  position: absolute;
+  top: 12px; left: 12px;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.result-duration {
+  position: absolute;
+  bottom: 12px; right: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.result-info { padding: 24px; }
+.result-title {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.result-uploader {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.format-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.format-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.format-list::-webkit-scrollbar { width: 4px; }
+.format-list::-webkit-scrollbar-track { background: transparent; }
+.format-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.format-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  background: rgba(15, 23, 42, 0.5);
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.format-option:hover { border-color: rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.05); }
+.format-option.selected { border-color: var(--accent); background: rgba(59, 130, 246, 0.08); }
+.format-option input[type="radio"] { display: none; }
+
+.format-radio {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--text-dim);
+  position: relative;
+  flex-shrink: 0;
+  transition: all var(--transition);
+}
+.format-option.selected .format-radio {
+  border-color: var(--accent);
+}
+.format-option.selected .format-radio::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: scaleIn 0.2s ease;
+}
+@keyframes scaleIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+.format-details { flex: 1; min-width: 0; }
+.format-quality {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.format-quality .badge-audio, .format-quality .badge-video {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.badge-video { background: rgba(59, 130, 246, 0.15); color: var(--accent); }
+.badge-audio { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
+.format-meta {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+.format-size {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.download-wrap { display: flex; gap: 12px; }
+.download-wrap .btn-download { flex: 1; }
+.btn-new-search {
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 14px 20px;
+  border-radius: var(--radius-lg);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-new-search:hover { background: rgba(148, 163, 184, 0.15); color: var(--text); }
+
+/* ===== FEATURES ===== */
+.features {
+  padding: 60px 0 80px;
+}
+.section-title {
+  text-align: center;
+  font-size: clamp(24px, 3.5vw, 32px);
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+.section-subtitle {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 16px;
+  margin-bottom: 48px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+.feature-card {
+  padding: 28px 24px;
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  transition: all 0.35s ease;
+}
+.feature-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(59, 130, 246, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+.feature-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  font-size: 22px;
+}
+.feature-icon svg { width: 24px; height: 24px; }
+.feature-icon.blue { background: rgba(59, 130, 246, 0.12); color: var(--accent); }
+.feature-icon.purple { background: rgba(139, 92, 246, 0.12); color: #a78bfa; }
+.feature-icon.green { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
+.feature-icon.amber { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+
+.feature-card h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.feature-card p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ===== LAIRABOOST PROMO ===== */
+.promo {
+  padding: 0 0 80px;
+}
+.promo-card {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.08));
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: var(--radius-xl);
+  padding: 48px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.promo-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.06), transparent 60%);
+  pointer-events: none;
+}
+.promo-card h2 {
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+  position: relative;
+}
+.promo-card .promo-subtitle {
+  color: var(--text-muted);
+  font-size: 15px;
+  margin-bottom: 28px;
+  position: relative;
+}
+
+.promo-services {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+  position: relative;
+}
+.promo-service {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+.promo-service:hover { transform: translateY(-3px) scale(1.08); border-color: var(--accent); }
+.promo-service svg { width: 24px; height: 24px; }
+
+.promo-btn { position: relative; }
+
+@media (max-width: 500px) {
+  .promo-card { padding: 32px 20px; }
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  padding: 32px 0;
+  border-top: 1px solid var(--border-light);
+  text-align: center;
+}
+.footer p {
+  color: var(--text-dim);
+  font-size: 13px;
+}
+.footer a { color: var(--accent); text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.2s ease;
+}
+.modal-overlay.visible { display: flex; }
+
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn 0.3s ease;
+  overflow: hidden;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 0;
+}
+.modal-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+}
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-close:hover { color: var(--text); background: rgba(148, 163, 184, 0.1); }
+.modal-close svg { width: 20px; height: 20px; }
+
+.modal-tabs {
+  display: flex;
+  padding: 16px 24px 0;
+  gap: 4px;
+}
+.modal-tab {
+  flex: 1;
+  padding: 10px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all var(--transition);
+}
+.modal-tab:hover { color: var(--text-muted); }
+.modal-tab.active {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--accent);
+}
+
+.modal-body { padding: 20px 24px 24px; }
+
+.form-group { margin-bottom: 16px; }
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 15px;
+  transition: all var(--transition);
+  outline: none;
+}
+.form-group input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.form-group input::placeholder { color: var(--text-dim); }
+
+.form-error {
+  color: var(--error);
+  font-size: 13px;
+  margin-top: 6px;
+  display: none;
+}
+.form-error.visible { display: block; }
+
+.auth-error {
+  color: var(--error);
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: var(--radius);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  display: none;
+}
+.auth-error.visible { display: block; animation: shake 0.4s ease; }
+
+.btn-auth {
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* ===== TOAST ===== */
+.toast-container {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  padding: 14px 20px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  animation: toastIn 0.4s ease, toastOut 0.3s ease 3.7s forwards;
+  max-width: 360px;
+}
+.toast.success { background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e; }
+.toast.error { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes toastOut { to { opacity: 0; transform: translateX(40px); } }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--bg-card); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--bg-card-hover); }
+
+/* ===== SKELETON ===== */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius);
+}
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+/* ===== NO-THUMBNAIL PLACEHOLDER ===== */
+.no-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+}
+.no-thumb svg { width: 64px; height: 64px; color: var(--text-dim); opacity: 0.4; }
+</style>
+</head>
+<body>
+
+<!-- Ambient background -->
+<div class="ambient">
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Header -->
+<header class="header">
+  <div class="container">
+    <a href="/" class="logo">
+      <div class="logo-icon">R</div>
+      <div class="logo-text">Repost<span>Laira</span></div>
+    </a>
+    <div class="header-right">
+      <div class="user-info" id="userInfo" style="display:none;">
+        <span class="user-email" id="userEmail"></span>
+        <span class="user-tier" id="userTier"></span>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Deconnexion</button>
+      </div>
+      <button class="btn btn-primary btn-sm" id="authBtn" onclick="openAuthModal()">Connexion</button>
+    </div>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Telechargeur de videos gratuit
+    </div>
+    <h1>Telechargez vos <span class="gradient-text">videos preferees</span></h1>
+    <p class="hero-subtitle">TikTok, Instagram, YouTube, Twitter, Facebook - gratuit et sans filigrane</p>
+
+    <div class="search-box">
+      <div class="search-input-wrap">
+        <input type="url" id="urlInput" placeholder="Collez le lien de la video ici..." autocomplete="off" spellcheck="false">
+        <button class="btn-paste" onclick="pasteFromClipboard()" title="Coller depuis le presse-papiers">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+        <button class="btn btn-primary btn-extract" id="extractBtn" onclick="extractVideo()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Telecharger
+        </button>
+      </div>
+      <div class="search-error" id="searchError"></div>
+    </div>
+
+    <div class="platforms">
+      <span class="platform-badge tiktok">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.88A2.89 2.89 0 0 1 9.5 12.4c.3 0 .59.05.87.13V9.07a6.32 6.32 0 0 0-.87-.06 6.34 6.34 0 0 0 0 12.68 6.34 6.34 0 0 0 6.34-6.34V9.05a8.27 8.27 0 0 0 4.75 1.5V7.11a4.83 4.83 0 0 1-1-.42z"/></svg>
+        TikTok
+      </span>
+      <span class="platform-badge instagram">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+        Instagram
+      </span>
+      <span class="platform-badge youtube">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        YouTube
+      </span>
+      <span class="platform-badge twitter">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        Twitter
+      </span>
+      <span class="platform-badge facebook">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        Facebook
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- Loading -->
+<section class="loading-section" id="loadingSection">
+  <div class="container">
+    <div class="spinner-wrap">
+      <div class="spinner"></div>
+      <p class="loading-text">Analyse de la video<span class="loading-dots"></span></p>
+    </div>
+  </div>
+</section>
+
+<!-- Result -->
+<section class="result-section" id="resultSection">
+  <div class="container">
+    <div class="result-card">
+      <div class="result-thumbnail" id="resultThumbnail">
+        <img id="resultImg" src="" alt="">
+        <div class="result-platform-tag" id="resultPlatform"></div>
+        <div class="result-duration" id="resultDuration"></div>
+      </div>
+      <div class="result-info">
+        <h2 class="result-title" id="resultTitle"></h2>
+        <p class="result-uploader" id="resultUploader"></p>
+        <p class="format-label">Choisir la qualite</p>
+        <div class="format-list" id="formatList"></div>
+        <div class="download-wrap">
+          <button class="btn btn-download btn-lg" id="downloadBtn" onclick="downloadVideo()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Telecharger
+          </button>
+          <button class="btn-new-search" onclick="resetSearch()">Nouveau</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features" id="features">
+  <div class="container">
+    <h2 class="section-title">Pourquoi RepostLaira ?</h2>
+    <p class="section-subtitle">La solution la plus simple pour telecharger vos contenus preferes</p>
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <div class="feature-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+        </div>
+        <h3>Sans filigrane</h3>
+        <p>Telechargez vos videos sans aucun watermark ni marque ajoutee. Le contenu original, pur et propre.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"></path></svg>
+        </div>
+        <h3>Haute qualite</h3>
+        <p>Selectionnez la meilleure resolution disponible. Jusqu'a 4K pour YouTube et la qualite maximale pour chaque plateforme.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+        </div>
+        <h3>Multi-plateforme</h3>
+        <p>Compatible avec TikTok, Instagram, YouTube, Twitter et Facebook. Un seul outil pour tous vos reseaux sociaux.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </div>
+        <h3>100% Gratuit</h3>
+        <p>Utilisez RepostLaira gratuitement. Passez en premium pour des telechargements illimites et sans publicite.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Lairaboost Promo -->
+<section class="promo">
+  <div class="container">
+    <div class="promo-card">
+      <h2>Boostez vos reseaux sociaux avec <span class="gradient-text">Lairaboost</span></h2>
+      <p class="promo-subtitle">Followers, likes, vues et plus encore. Developpez votre audience sur toutes les plateformes.</p>
+      <div class="promo-services">
+
+        <!-- Instagram -->
+        <div class="promo-service" title="Instagram">
+          <svg viewBox="0 0 24 24" fill="var(--instagram)"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+        </div>
+
+        <!-- TikTok -->
+        <div class="promo-service" title="TikTok">
+          <svg viewBox="0 0 24 24" fill="var(--tiktok)"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.88-2.88A2.89 2.89 0 0 1 9.5 12.4c.3 0 .59.05.87.13V9.07a6.32 6.32 0 0 0-.87-.06 6.34 6.34 0 0 0 0 12.68 6.34 6.34 0 0 0 6.34-6.34V9.05a8.27 8.27 0 0 0 4.75 1.5V7.11a4.83 4.83 0 0 1-1-.42z"/></svg>
+        </div>
+
+        <!-- YouTube -->
+        <div class="promo-service" title="YouTube">
+          <svg viewBox="0 0 24 24" fill="var(--youtube)"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </div>
+
+        <!-- Twitter/X -->
+        <div class="promo-service" title="Twitter / X">
+          <svg viewBox="0 0 24 24" fill="var(--twitter)"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </div>
+
+        <!-- Telegram -->
+        <div class="promo-service" title="Telegram">
+          <svg viewBox="0 0 24 24" fill="#26A5E4"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </div>
+
+        <!-- Spotify -->
+        <div class="promo-service" title="Spotify">
+          <svg viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+        </div>
+
+      </div>
+      <a href="https://lairaboost.com" target="_blank" rel="noopener" class="btn btn-primary btn-lg promo-btn">
+        Decouvrir Lairaboost
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <p>RepostLaira - Propulse par <a href="https://lairaboost.com" target="_blank" rel="noopener">Lairaboost.com</a></p>
+    <p style="margin-top:6px;">&copy; 2026 RepostLaira. Tous droits reserves.</p>
+  </div>
+</footer>
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="authModalTitle">Connexion</h2>
+      <button class="modal-close" onclick="closeAuthModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tabLogin" onclick="switchAuthTab('login')">Connexion</button>
+      <button class="modal-tab" id="tabRegister" onclick="switchAuthTab('register')">Inscription</button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-error" id="authError"></div>
+      <form id="authForm" onsubmit="handleAuth(event)">
+        <div class="form-group">
+          <label for="authEmail">Adresse e-mail</label>
+          <input type="email" id="authEmail" placeholder="votre@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="authPassword">Mot de passe</label>
+          <input type="password" id="authPassword" placeholder="Votre mot de passe" required minlength="8">
+          <div class="form-error" id="passwordError">Le mot de passe doit contenir au moins 8 caracteres</div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg btn-auth" id="authSubmitBtn">Se connecter</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const API_BASE = '';
+  let currentAuthMode = 'login';
+  let extractedData = null;
+  let selectedFormatId = null;
+  let currentUrl = '';
+
+  // ===== AUTH STATE =====
+
+  function getToken() {
+    return localStorage.getItem('repostlaira_token');
+  }
+
+  function setToken(token) {
+    localStorage.setItem('repostlaira_token', token);
+  }
+
+  function clearToken() {
+    localStorage.removeItem('repostlaira_token');
+  }
+
+  function getHeaders() {
+    const headers = { 'Content-Type': 'application/json' };
+    const token = getToken();
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    return headers;
+  }
+
+  function updateAuthUI(user) {
+    const authBtn = document.getElementById('authBtn');
+    const userInfo = document.getElementById('userInfo');
+    const userEmail = document.getElementById('userEmail');
+    const userTier = document.getElementById('userTier');
+
+    if (user) {
+      authBtn.style.display = 'none';
+      userInfo.style.display = 'flex';
+      userEmail.textContent = user.email || '';
+      userTier.textContent = user.tier || user.plan || 'Free';
+    } else {
+      authBtn.style.display = '';
+      userInfo.style.display = 'none';
+    }
+  }
+
+  function checkExistingSession() {
+    const token = getToken();
+    if (token) {
+      // Try to decode the JWT payload to show user info
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.email) {
+          updateAuthUI({ email: payload.email, tier: payload.tier || payload.plan || 'Free' });
+        }
+      } catch(e) {
+        // Token might not be a JWT or is invalid, just show as logged in
+        updateAuthUI({ email: 'Utilisateur', tier: 'Free' });
+      }
+    }
+  }
+
+  // ===== AUTH MODAL =====
+
+  window.openAuthModal = function() {
+    document.getElementById('authModal').classList.add('visible');
+    document.getElementById('authEmail').focus();
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeAuthModal = function() {
+    document.getElementById('authModal').classList.remove('visible');
+    document.body.style.overflow = '';
+    document.getElementById('authError').classList.remove('visible');
+    document.getElementById('passwordError').classList.remove('visible');
+    document.getElementById('authForm').reset();
+  };
+
+  window.switchAuthTab = function(mode) {
+    currentAuthMode = mode;
+    const tabLogin = document.getElementById('tabLogin');
+    const tabRegister = document.getElementById('tabRegister');
+    const title = document.getElementById('authModalTitle');
+    const submitBtn = document.getElementById('authSubmitBtn');
+
+    tabLogin.classList.toggle('active', mode === 'login');
+    tabRegister.classList.toggle('active', mode === 'register');
+    title.textContent = mode === 'login' ? 'Connexion' : 'Inscription';
+    submitBtn.textContent = mode === 'login' ? 'Se connecter' : 'Creer un compte';
+    document.getElementById('authError').classList.remove('visible');
+    document.getElementById('passwordError').classList.remove('visible');
+  };
+
+  window.handleAuth = async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const errorEl = document.getElementById('authError');
+    const passError = document.getElementById('passwordError');
+    const submitBtn = document.getElementById('authSubmitBtn');
+
+    errorEl.classList.remove('visible');
+    passError.classList.remove('visible');
+
+    if (currentAuthMode === 'register' && password.length < 8) {
+      passError.classList.add('visible');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Chargement...';
+
+    try {
+      const endpoint = currentAuthMode === 'login' ? '/api/auth/login' : '/api/auth/register';
+      const res = await fetch(API_BASE + endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.token) {
+        throw new Error(data.message || data.error || 'Erreur d\'authentification');
+      }
+
+      setToken(data.token);
+      updateAuthUI(data.user || { email });
+      closeAuthModal();
+      showToast(currentAuthMode === 'login' ? 'Connexion reussie' : 'Compte cree avec succes', 'success');
+    } catch (err) {
+      errorEl.textContent = err.message || 'Une erreur est survenue';
+      errorEl.classList.add('visible');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = currentAuthMode === 'login' ? 'Se connecter' : 'Creer un compte';
+    }
+  };
+
+  window.logout = function() {
+    clearToken();
+    updateAuthUI(null);
+    showToast('Deconnexion reussie', 'success');
+  };
+
+  // Close modal on overlay click
+  document.getElementById('authModal').addEventListener('click', function(e) {
+    if (e.target === this) closeAuthModal();
+  });
+
+  // ===== PASTE =====
+
+  window.pasteFromClipboard = async function() {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        document.getElementById('urlInput').value = text;
+        document.getElementById('urlInput').focus();
+      }
+    } catch(e) {
+      // Clipboard API not available, silently fail
+    }
+  };
+
+  // ===== EXTRACT =====
+
+  window.extractVideo = async function() {
+    const input = document.getElementById('urlInput');
+    const url = input.value.trim();
+    const errorEl = document.getElementById('searchError');
+    const loadingSection = document.getElementById('loadingSection');
+    const resultSection = document.getElementById('resultSection');
+    const extractBtn = document.getElementById('extractBtn');
+
+    // Reset
+    errorEl.classList.remove('visible');
+    resultSection.classList.remove('visible');
+    extractedData = null;
+    selectedFormatId = null;
+
+    if (!url) {
+      showError('Veuillez coller un lien de video');
+      input.focus();
+      return;
+    }
+
+    // Basic URL validation
+    try {
+      new URL(url);
+    } catch(e) {
+      showError('Veuillez entrer un lien valide');
+      return;
+    }
+
+    currentUrl = url;
+
+    // Show loading
+    loadingSection.classList.add('visible');
+    extractBtn.disabled = true;
+    extractBtn.innerHTML = '<div class="spinner" style="width:20px;height:20px;"></div>';
+
+    try {
+      const res = await fetch(API_BASE + '/api/extract', {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ url })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || data.error || 'Impossible d\'extraire cette video');
+      }
+
+      extractedData = data.data;
+      displayResult(data.data);
+    } catch (err) {
+      showError(err.message || 'Erreur lors de l\'extraction. Verifiez le lien et reessayez.');
+    } finally {
+      loadingSection.classList.remove('visible');
+      extractBtn.disabled = false;
+      extractBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Telecharger';
+    }
+  };
+
+  function showError(msg) {
+    const errorEl = document.getElementById('searchError');
+    errorEl.textContent = msg;
+    errorEl.classList.add('visible');
+  }
+
+  // ===== DISPLAY RESULT =====
+
+  function displayResult(data) {
+    const resultSection = document.getElementById('resultSection');
+    const resultImg = document.getElementById('resultImg');
+    const resultThumbnail = document.getElementById('resultThumbnail');
+    const resultPlatform = document.getElementById('resultPlatform');
+    const resultDuration = document.getElementById('resultDuration');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultUploader = document.getElementById('resultUploader');
+    const formatList = document.getElementById('formatList');
+
+    // Thumbnail
+    if (data.thumbnail) {
+      resultImg.src = data.thumbnail;
+      resultImg.style.display = '';
+      resultThumbnail.classList.remove('no-thumb');
+      resultThumbnail.innerHTML = '';
+      resultThumbnail.appendChild(resultImg);
+    } else {
+      resultThumbnail.classList.add('no-thumb');
+      resultThumbnail.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>';
+    }
+
+    // Platform tag
+    const platformColors = {
+      tiktok: { bg: 'rgba(255,0,80,0.8)', color: '#fff' },
+      instagram: { bg: 'rgba(228,64,95,0.8)', color: '#fff' },
+      youtube: { bg: 'rgba(255,0,0,0.8)', color: '#fff' },
+      twitter: { bg: 'rgba(29,161,242,0.8)', color: '#fff' },
+      facebook: { bg: 'rgba(24,119,242,0.8)', color: '#fff' },
+    };
+    const platform = (data.platform || 'video').toLowerCase();
+    const pColor = platformColors[platform] || { bg: 'rgba(59,130,246,0.8)', color: '#fff' };
+    resultPlatform.textContent = capitalize(platform);
+    resultPlatform.style.background = pColor.bg;
+    resultPlatform.style.color = pColor.color;
+
+    // Duration
+    if (data.duration) {
+      resultDuration.textContent = formatDuration(data.duration);
+      resultDuration.style.display = '';
+    } else {
+      resultDuration.style.display = 'none';
+    }
+
+    // Append platform tag and duration back to thumbnail
+    resultThumbnail.appendChild(resultPlatform);
+    resultThumbnail.appendChild(resultDuration);
+
+    // Title & uploader
+    resultTitle.textContent = data.title || 'Video sans titre';
+    resultUploader.textContent = data.uploader ? 'Par ' + data.uploader : '';
+
+    // Formats
+    formatList.innerHTML = '';
+    const formats = data.formats || [];
+
+    if (formats.length === 0) {
+      formatList.innerHTML = '<p style="color:var(--text-muted);font-size:14px;padding:12px;">Aucun format disponible</p>';
+      document.getElementById('downloadBtn').disabled = true;
+      selectedFormatId = null;
+    } else {
+      formats.forEach(function(fmt, idx) {
+        const div = document.createElement('div');
+        div.className = 'format-option' + (idx === 0 ? ' selected' : '');
+        div.setAttribute('data-format-id', fmt.format_id);
+
+        let badges = '';
+        if (fmt.has_video) badges += '<span class="badge-video">Video</span>';
+        if (fmt.has_audio) badges += '<span class="badge-audio">Audio</span>';
+
+        let size = '';
+        if (fmt.filesize) {
+          size = formatFilesize(fmt.filesize);
+        }
+
+        div.innerHTML =
+          '<div class="format-radio"></div>' +
+          '<div class="format-details">' +
+            '<div class="format-quality">' + escapeHtml(fmt.quality || fmt.format_id) + ' ' + badges + '</div>' +
+            '<div class="format-meta">' + escapeHtml(fmt.ext || '').toUpperCase() + '</div>' +
+          '</div>' +
+          (size ? '<div class="format-size">' + size + '</div>' : '');
+
+        div.addEventListener('click', function() {
+          document.querySelectorAll('.format-option').forEach(function(el) { el.classList.remove('selected'); });
+          div.classList.add('selected');
+          selectedFormatId = fmt.format_id;
+        });
+
+        formatList.appendChild(div);
+      });
+
+      selectedFormatId = formats[0].format_id;
+      document.getElementById('downloadBtn').disabled = false;
+    }
+
+    // Show result
+    resultSection.classList.add('visible');
+    resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ===== DOWNLOAD =====
+
+  window.downloadVideo = async function() {
+    if (!selectedFormatId || !currentUrl) return;
+
+    const btn = document.getElementById('downloadBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;"></div> Preparation...';
+
+    try {
+      const params = new URLSearchParams({ url: currentUrl, format_id: selectedFormatId });
+      const res = await fetch(API_BASE + '/api/extract/url?' + params.toString(), {
+        headers: getHeaders()
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success || !data.data || !data.data.url) {
+        throw new Error(data.message || data.error || 'Impossible de generer le lien de telechargement');
+      }
+
+      // Open direct download URL in new tab
+      window.open(data.data.url, '_blank');
+      showToast('Telechargement lance dans un nouvel onglet', 'success');
+    } catch(err) {
+      showToast(err.message || 'Erreur de telechargement', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Telecharger';
+    }
+  };
+
+  // ===== RESET =====
+
+  window.resetSearch = function() {
+    document.getElementById('resultSection').classList.remove('visible');
+    document.getElementById('urlInput').value = '';
+    document.getElementById('searchError').classList.remove('visible');
+    extractedData = null;
+    selectedFormatId = null;
+    currentUrl = '';
+    document.getElementById('urlInput').focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // ===== TOAST =====
+
+  function showToast(msg, type) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + (type || 'success');
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(function() {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+    }, 4000);
+  }
+  window.showToast = showToast;
+
+  // ===== UTILS =====
+
+  function capitalize(s) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  function formatDuration(seconds) {
+    if (typeof seconds === 'string') {
+      // Already formatted
+      if (seconds.includes(':')) return seconds;
+      seconds = parseInt(seconds, 10);
+    }
+    if (!seconds || isNaN(seconds)) return '';
+    var h = Math.floor(seconds / 3600);
+    var m = Math.floor((seconds % 3600) / 60);
+    var s = Math.floor(seconds % 60);
+    if (h > 0) {
+      return h + ':' + pad(m) + ':' + pad(s);
+    }
+    return m + ':' + pad(s);
+  }
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function formatFilesize(bytes) {
+    if (!bytes || bytes <= 0) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
+    return (bytes / 1073741824).toFixed(2) + ' GB';
+  }
+
+  // ===== KEYBOARD SHORTCUTS =====
+
+  document.addEventListener('keydown', function(e) {
+    // Enter to extract
+    if (e.key === 'Enter' && document.activeElement === document.getElementById('urlInput')) {
+      e.preventDefault();
+      extractVideo();
+    }
+    // Escape to close modal
+    if (e.key === 'Escape') {
+      closeAuthModal();
+    }
+  });
+
+  // ===== INIT =====
+
+  checkExistingSession();
+
+})();
+</script>
+</body>
+</html>

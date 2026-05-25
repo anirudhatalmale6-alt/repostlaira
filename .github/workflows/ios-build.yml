@@ -45,6 +45,17 @@ jobs:
           echo '${{ secrets.IOS_PROVISION_PROFILE }}' | base64 --decode > RepostLaira_AppStore.mobileprovision
           echo '${{ secrets.IOS_DIST_CERT }}' | base64 --decode > dist_cert.p12
           echo '${{ secrets.ASC_API_KEY }}' | base64 --decode > AuthKey_K2QW79TPA6.p8
+          cat > credentials.json << 'EOF'
+          {
+            "ios": {
+              "provisioningProfilePath": "./RepostLaira_AppStore.mobileprovision",
+              "distributionCertificate": {
+                "path": "./dist_cert.p12",
+                "password": "arialtravel2026"
+              }
+            }
+          }
+          EOF
 
       - name: Build iOS locally
         run: eas build --platform ios --profile production --local --non-interactive --output ./RepostLaira.ipa

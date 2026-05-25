@@ -24,7 +24,7 @@ app.use(cors({
 app.use(express.json({
   limit: '1mb',
   verify: (req: any, _res, buf) => {
-    if (req.originalUrl === '/api/payment/stripe/webhook') {
+    if (req.originalUrl === '/api/payment/stripe/webhook' || req.originalUrl === '/api/payment/paypal/webhook') {
       req.rawBody = buf;
     }
   },

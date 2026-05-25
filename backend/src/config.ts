@@ -32,4 +32,15 @@ export const config = {
     path: process.env.YTDLP_PATH || '/usr/bin/yt-dlp',
     timeout: parseInt(process.env.YTDLP_TIMEOUT || '30000', 10),
   },
+
+  paypal: {
+    clientId: process.env.PAYPAL_CLIENT_ID || '',
+    clientSecret: process.env.PAYPAL_CLIENT_SECRET || '',
+    mode: (process.env.PAYPAL_MODE || 'sandbox') as 'sandbox' | 'live',
+    get baseUrl(): string {
+      return this.mode === 'live'
+        ? 'https://api-m.paypal.com'
+        : 'https://api-m.sandbox.paypal.com';
+    },
+  },
 } as const;

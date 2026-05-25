@@ -1259,6 +1259,156 @@ body {
   background: linear-gradient(135deg, #0f172a, #1e293b);
 }
 .no-thumb svg { width: 64px; height: 64px; color: var(--text-dim); opacity: 0.4; }
+
+/* ===== PAYMENT MODAL ===== */
+.payment-modal .modal { max-width: 500px; }
+.payment-modal .modal-body { padding: 20px 24px 28px; }
+
+.payment-type-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.payment-type-tab {
+  flex: 1;
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: center;
+}
+.payment-type-tab:hover { border-color: rgba(59, 130, 246, 0.3); }
+.payment-type-tab.active {
+  border-color: var(--accent);
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--accent);
+}
+
+.payment-packs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.payment-pack-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  background: rgba(15, 23, 42, 0.5);
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.payment-pack-option:hover { border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.06); }
+.payment-pack-option.selected { border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+.payment-pack-option .pack-coins {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.payment-pack-option .pack-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.premium-info {
+  text-align: center;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.premium-info .premium-price-display {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
+}
+.premium-info .premium-price-display .currency { font-size: 18px; vertical-align: super; }
+.premium-info .premium-price-display .period { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+.premium-info p {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.btn-paypal {
+  background: #FFC439;
+  color: #003087;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 14px 24px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all var(--transition);
+  width: 100%;
+}
+.btn-paypal:hover { background: #f0b929; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255, 196, 57, 0.3); }
+.btn-paypal:active { transform: scale(0.98); }
+.btn-paypal:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.btn-paypal svg { width: 22px; height: 22px; }
+.btn-paypal .paypal-text { letter-spacing: 0.3px; }
+
+.payment-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.payment-divider::before, .payment-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.payment-processing {
+  display: none;
+  text-align: center;
+  padding: 32px 16px;
+}
+.payment-processing.visible { display: block; }
+.payment-processing .spinner { margin: 0 auto 16px; }
+.payment-processing p { color: var(--text-muted); font-size: 15px; }
+
+.payment-success {
+  display: none;
+  text-align: center;
+  padding: 24px 16px;
+}
+.payment-success.visible { display: block; }
+.payment-success-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.payment-success-icon svg { width: 28px; height: 28px; color: var(--success); }
+.payment-success h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.payment-success p { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; }
 </style>
 </head>
 <body>
@@ -1526,7 +1676,7 @@ body {
             Acces API
           </li>
         </ul>
-        <button class="btn btn-primary btn-lg" onclick="openAuthModal()">S'abonner</button>
+        <button class="btn btn-primary btn-lg" onclick="openPaymentModalFor('premium')">S'abonner</button>
       </div>
 
       <!-- Recharge plan -->
@@ -1536,20 +1686,20 @@ body {
         <div class="pricing-price" style="font-size:24px;letter-spacing:0;">Achetez des coins</div>
         <p style="color:var(--text-muted);font-size:14px;margin-top:8px;margin-bottom:4px;">1 telechargement = 1 coin</p>
         <div class="recharge-packs">
-          <div class="recharge-pack">
+          <div class="recharge-pack" onclick="openPaymentModalFor('coins', 'coins_50')" style="cursor:pointer;">
             <span class="recharge-coins"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M6 12h12"></path></svg>50 coins</span>
             <span class="recharge-price">1,99 EUR</span>
           </div>
-          <div class="recharge-pack">
+          <div class="recharge-pack" onclick="openPaymentModalFor('coins', 'coins_150')" style="cursor:pointer;">
             <span class="recharge-coins"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M6 12h12"></path></svg>150 coins</span>
             <span class="recharge-price">4,99 EUR</span>
           </div>
-          <div class="recharge-pack">
+          <div class="recharge-pack" onclick="openPaymentModalFor('coins', 'coins_500')" style="cursor:pointer;">
             <span class="recharge-coins"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M6 12h12"></path></svg>500 coins</span>
             <span class="recharge-price">14,99 EUR</span>
           </div>
         </div>
-        <button class="btn btn-lg" style="width:100%;background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 2px 16px rgba(16,185,129,0.3);" onclick="openAuthModal()">Acheter des coins</button>
+        <button class="btn btn-lg" style="width:100%;background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 2px 16px rgba(16,185,129,0.3);" onclick="openPaymentModalFor('coins')">Acheter des coins</button>
       </div>
 
     </div>
@@ -1605,7 +1755,78 @@ body {
   </div>
 </footer>
 
-<!-- 9. AUTH MODAL -->
+<!-- 9. PAYMENT MODAL -->
+<div class="modal-overlay payment-modal" id="paymentModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="paymentModalTitle">Acheter</h2>
+      <button class="modal-close" onclick="closePaymentModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <!-- Step 1: Choose type and product -->
+      <div id="paymentStep1">
+        <div class="payment-type-tabs">
+          <button class="payment-type-tab active" id="payTabCoins" onclick="switchPaymentType('coins')">Acheter des Coins</button>
+          <button class="payment-type-tab" id="payTabPremium" onclick="switchPaymentType('premium')">Premium</button>
+        </div>
+
+        <!-- Coins packs -->
+        <div id="paymentCoinsSection">
+          <div class="payment-packs" id="paymentPacksList">
+            <div class="payment-pack-option selected" data-pack="coins_50" onclick="selectPack(this, 'coins_50')">
+              <span class="pack-coins">50 coins</span>
+              <span class="pack-price">1,99 EUR</span>
+            </div>
+            <div class="payment-pack-option" data-pack="coins_150" onclick="selectPack(this, 'coins_150')">
+              <span class="pack-coins">150 coins</span>
+              <span class="pack-price">4,99 EUR</span>
+            </div>
+            <div class="payment-pack-option" data-pack="coins_500" onclick="selectPack(this, 'coins_500')">
+              <span class="pack-coins">500 coins</span>
+              <span class="pack-price">14,99 EUR</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Premium info -->
+        <div id="paymentPremiumSection" style="display:none;">
+          <div class="premium-info">
+            <div class="premium-price-display"><span class="currency">EUR </span>4,99 <span class="period">/ mois</span></div>
+            <p>Telechargements illimites, qualite HD, sans publicites</p>
+          </div>
+        </div>
+
+        <!-- Payment buttons -->
+        <div class="payment-methods">
+          <button class="btn-paypal" id="paypalPayBtn" onclick="startPayPalPayment()">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 2.735a.771.771 0 0 1 .762-.646h6.613c2.193 0 3.726.556 4.558 1.653.39.513.635 1.058.734 1.62.104.587.105 1.293-.003 2.158l-.011.078v.676l.526.298a3.36 3.36 0 0 1 1.07.888c.333.42.545.95.634 1.576.091.642.059 1.39-.096 2.22-.178.966-.467 1.81-.86 2.505a5.28 5.28 0 0 1-1.334 1.588c-.53.422-1.164.733-1.885.924-.7.186-1.506.28-2.395.28h-.57a1.72 1.72 0 0 0-1.698 1.449l-.043.236-.727 4.608-.033.17a.281.281 0 0 1-.276.236z"/></svg>
+            <span class="paypal-text">Payer avec PayPal</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Processing -->
+      <div class="payment-processing" id="paymentStep2">
+        <div class="spinner"></div>
+        <p>Traitement du paiement en cours...</p>
+      </div>
+
+      <!-- Step 3: Success -->
+      <div class="payment-success" id="paymentStep3">
+        <div class="payment-success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <h3 id="paymentSuccessTitle">Paiement reussi !</h3>
+        <p id="paymentSuccessMsg">Vos coins ont ete ajoutes a votre compte.</p>
+        <button class="btn btn-primary btn-lg" onclick="closePaymentModal()" style="width:100%;">Continuer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 10. AUTH MODAL -->
 <div class="modal-overlay" id="authModal">
   <div class="modal">
     <div class="modal-header">
@@ -2189,11 +2410,233 @@ body {
     }, 3000);
   }
 
+  // ===== PAYMENT MODAL =====
+
+  var selectedPaymentType = 'coins';
+  var selectedPackId = 'coins_50';
+
+  window.openPaymentModal = function() {
+    var token = getToken();
+    if (!token) {
+      openAuthModal();
+      return;
+    }
+    document.getElementById('paymentModal').classList.add('visible');
+    document.body.style.overflow = 'hidden';
+    // Reset to step 1
+    document.getElementById('paymentStep1').style.display = '';
+    document.getElementById('paymentStep2').classList.remove('visible');
+    document.getElementById('paymentStep3').classList.remove('visible');
+  };
+
+  window.openPaymentModalFor = function(type, packId) {
+    var token = getToken();
+    if (!token) {
+      openAuthModal();
+      return;
+    }
+    selectedPaymentType = type || 'coins';
+    selectedPackId = packId || 'coins_50';
+
+    // Update UI tabs
+    switchPaymentType(selectedPaymentType);
+    if (type === 'coins' && packId) {
+      var allPacks = document.querySelectorAll('.payment-pack-option');
+      allPacks.forEach(function(el) {
+        el.classList.toggle('selected', el.getAttribute('data-pack') === packId);
+      });
+    }
+
+    openPaymentModal();
+  };
+
+  window.closePaymentModal = function() {
+    document.getElementById('paymentModal').classList.remove('visible');
+    document.body.style.overflow = '';
+  };
+
+  // Close modal on overlay click
+  document.getElementById('paymentModal').addEventListener('click', function(e) {
+    if (e.target === this) closePaymentModal();
+  });
+
+  window.switchPaymentType = function(type) {
+    selectedPaymentType = type;
+    document.getElementById('payTabCoins').classList.toggle('active', type === 'coins');
+    document.getElementById('payTabPremium').classList.toggle('active', type === 'premium');
+    document.getElementById('paymentCoinsSection').style.display = type === 'coins' ? '' : 'none';
+    document.getElementById('paymentPremiumSection').style.display = type === 'premium' ? '' : 'none';
+    document.getElementById('paymentModalTitle').textContent = type === 'premium' ? 'Premium' : 'Acheter des Coins';
+
+    if (type === 'premium') {
+      document.getElementById('paypalPayBtn').querySelector('.paypal-text').textContent = 'S\'abonner avec PayPal';
+    } else {
+      document.getElementById('paypalPayBtn').querySelector('.paypal-text').textContent = 'Payer avec PayPal';
+    }
+  };
+
+  window.selectPack = function(el, packId) {
+    selectedPackId = packId;
+    document.querySelectorAll('.payment-pack-option').forEach(function(opt) {
+      opt.classList.remove('selected');
+    });
+    el.classList.add('selected');
+  };
+
+  window.startPayPalPayment = async function() {
+    var token = getToken();
+    if (!token) {
+      closePaymentModal();
+      openAuthModal();
+      return;
+    }
+
+    var productId = selectedPaymentType === 'premium' ? 'premium' : selectedPackId;
+    if (!productId) {
+      showToast('Veuillez selectionner un produit', 'error');
+      return;
+    }
+
+    // Show processing
+    var payBtn = document.getElementById('paypalPayBtn');
+    payBtn.disabled = true;
+    document.getElementById('paymentStep1').style.display = 'none';
+    document.getElementById('paymentStep2').classList.add('visible');
+
+    try {
+      // Create PayPal order
+      var createRes = await fetch(API_BASE + '/api/payment/paypal/create-order', {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({
+          type: selectedPaymentType,
+          pack_id: selectedPaymentType === 'coins' ? selectedPackId : undefined,
+          product_id: productId,
+        }),
+      });
+
+      var createData = await createRes.json();
+
+      if (!createRes.ok || !createData.success) {
+        throw new Error(createData.error || createData.message || 'Erreur lors de la creation de la commande');
+      }
+
+      var orderData = createData.data;
+      var approvalUrl = orderData.approval_url || orderData.approvalUrl;
+
+      if (approvalUrl) {
+        // Store order info for when user returns
+        localStorage.setItem('repostlaira_paypal_order', JSON.stringify({
+          orderId: orderData.order_id || orderData.orderId,
+          productId: productId,
+          type: selectedPaymentType,
+          timestamp: Date.now(),
+        }));
+
+        // Redirect to PayPal
+        window.location.href = approvalUrl;
+      } else {
+        throw new Error('Aucune URL d\'approbation recue de PayPal');
+      }
+    } catch (err) {
+      console.error('[paypal] Payment error:', err);
+      showToast(err.message || 'Erreur lors du paiement PayPal', 'error');
+
+      // Reset to step 1
+      document.getElementById('paymentStep2').classList.remove('visible');
+      document.getElementById('paymentStep1').style.display = '';
+      payBtn.disabled = false;
+    }
+  };
+
+  // Handle PayPal return (user comes back after approving on PayPal)
+  async function handlePayPalReturn() {
+    var params = new URLSearchParams(window.location.search);
+    var paymentStatus = params.get('payment');
+    var provider = params.get('provider');
+
+    if (paymentStatus === 'cancelled' && provider === 'paypal') {
+      showToast('Paiement annule', 'error');
+      localStorage.removeItem('repostlaira_paypal_order');
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+      return;
+    }
+
+    if (paymentStatus === 'success' && provider === 'paypal') {
+      var token = getToken();
+      var storedOrder = localStorage.getItem('repostlaira_paypal_order');
+
+      if (!token || !storedOrder) {
+        showToast('Paiement recu. Veuillez vous reconnecter pour voir vos coins.', 'success');
+        localStorage.removeItem('repostlaira_paypal_order');
+        window.history.replaceState({}, '', window.location.pathname);
+        return;
+      }
+
+      var orderInfo;
+      try {
+        orderInfo = JSON.parse(storedOrder);
+      } catch {
+        localStorage.removeItem('repostlaira_paypal_order');
+        window.history.replaceState({}, '', window.location.pathname);
+        return;
+      }
+
+      // Check if order is not too old (30 minutes max)
+      if (Date.now() - orderInfo.timestamp > 30 * 60 * 1000) {
+        showToast('La session de paiement a expire', 'error');
+        localStorage.removeItem('repostlaira_paypal_order');
+        window.history.replaceState({}, '', window.location.pathname);
+        return;
+      }
+
+      // Capture the payment
+      try {
+        var captureRes = await fetch(API_BASE + '/api/payment/paypal/capture-order', {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({ orderId: orderInfo.orderId }),
+        });
+
+        var captureData = await captureRes.json();
+
+        if (captureRes.ok && captureData.success) {
+          var data = captureData.data;
+          if (data.coins_added) {
+            showToast(data.coins_added + ' coins ajoutes a votre compte !', 'success');
+          } else if (data.subscription) {
+            showToast('Abonnement Premium active ! Telechargements illimites.', 'success');
+            // Update tier display
+            var tierEl = document.getElementById('userTier');
+            if (tierEl) tierEl.textContent = 'Premium';
+          } else {
+            showToast('Paiement reussi !', 'success');
+          }
+        } else {
+          // Payment might have already been processed via webhook
+          if (captureData.data && captureData.data.message) {
+            showToast(captureData.data.message, 'success');
+          } else {
+            showToast(captureData.error || 'Erreur lors de la finalisation du paiement', 'error');
+          }
+        }
+      } catch (err) {
+        console.error('[paypal] Capture error:', err);
+        showToast('Erreur lors de la finalisation. Vos coins seront ajoutes sous peu.', 'error');
+      }
+
+      localStorage.removeItem('repostlaira_paypal_order');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }
+
   // ===== INIT =====
 
   checkExistingSession();
   initScrollReveal();
   initCarousel();
+  handlePayPalReturn();
 
 })();
 </script>

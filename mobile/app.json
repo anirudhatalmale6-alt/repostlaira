@@ -20,7 +20,8 @@
       "bundleIdentifier": "com.lairaboost.repostlaira",
       "infoPlist": {
         "NSPhotoLibraryAddUsageDescription": "RepostLaira a besoin d'acceder a votre galerie pour enregistrer les medias telecharges.",
-        "NSPhotoLibraryUsageDescription": "RepostLaira a besoin d'acceder a votre galerie pour enregistrer les medias telecharges."
+        "NSPhotoLibraryUsageDescription": "RepostLaira a besoin d'acceder a votre galerie pour enregistrer les medias telecharges.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -31,7 +32,10 @@
       "package": "com.lairaboost.repostlaira",
       "permissions": [
         "WRITE_EXTERNAL_STORAGE",
-        "READ_EXTERNAL_STORAGE"
+        "READ_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION"
       ]
     },
     "plugins": [
@@ -54,6 +58,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "29936482-3946-4503-b842-11a773e94cbb"
+      }
+    },
+    "owner": "arialtravel"
   }
 }

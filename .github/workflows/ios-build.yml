@@ -1,0 +1,48 @@
+name: iOS Build & Submit
+on:
+  workflow_dispatch:
+    inputs:
+      submit:
+        description: 'Submit to App Store after build'
+        required: false
+        default: 'false'
+
+jobs:
+  build:
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      EXPO_APPLE_ID: ${{ secrets.APPLE_ID }}
+      EXPO_APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build iOS locally
+        run: eas build --platform ios --profile production --local --output ./RepostLaira.ipa
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RepostLaira-iOS
+          path: mobile/RepostLaira.ipa
+
+      - name: Submit to App Store
+        if: ${{ github.event.inputs.submit == 'true' }}
+        run: eas submit --platform ios --path ./RepostLaira.ipa --non-interactive

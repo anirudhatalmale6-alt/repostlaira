@@ -17,10 +17,20 @@
     "production": {
       "autoIncrement": true,
       "ios": {
-        "buildConfiguration": "Release"
+        "buildConfiguration": "Release",
+        "credentialsSource": "local"
       },
       "android": {
         "buildType": "app-bundle"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascApiKeyPath": "./AuthKey_K2QW79TPA6.p8",
+        "ascApiKeyIssuerId": "ac10966d-fa49-40d5-a6a4-ef1ebb3b2fce",
+        "ascApiKeyId": "K2QW79TPA6"
       }
     }
   }

@@ -9,15 +9,18 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-15
     defaults:
       run:
         working-directory: mobile
-    env:
-      EXPO_APPLE_ID: ${{ secrets.APPLE_ID }}
-      EXPO_APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Select latest Xcode
+        run: |
+          XCODE_PATH=$(ls -d /Applications/Xcode_16* 2>/dev/null | sort -V | tail -1 || ls -d /Applications/Xcode* 2>/dev/null | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE_PATH"
+          xcodebuild -version
 
       - uses: actions/setup-node@v4
         with:
@@ -28,14 +31,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install EAS CLI
+        run: npm install -g eas-cli@latest
+
       - name: Setup Expo
         uses: expo/expo-github-action@v8
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Restore iOS signing files
+        run: |
+          echo '${{ secrets.IOS_PROVISION_PROFILE }}' | base64 --decode > RepostLaira_AppStore.mobileprovision
+          echo '${{ secrets.IOS_DIST_CERT }}' | base64 --decode > dist_cert.p12
+          echo '${{ secrets.ASC_API_KEY }}' | base64 --decode > AuthKey_K2QW79TPA6.p8
+
       - name: Build iOS locally
-        run: eas build --platform ios --profile production --local --output ./RepostLaira.ipa
+        run: eas build --platform ios --profile production --local --non-interactive --output ./RepostLaira.ipa
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4

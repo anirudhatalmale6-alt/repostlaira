@@ -5,3 +5,7 @@ dist/
 .env
 *.tsbuildinfo
 builds/
+*.p12
+*.p8
+*.mobileprovision
+credentials.json

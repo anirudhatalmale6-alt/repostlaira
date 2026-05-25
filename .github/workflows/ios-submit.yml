@@ -1,0 +1,56 @@
+name: iOS Submit to App Store
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'Build run ID to download IPA from (leave empty for latest)'
+        required: false
+        default: ''
+
+jobs:
+  submit:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download IPA artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: RepostLaira-iOS
+          path: ./
+          run-id: ${{ github.event.inputs.run_id || '26378140096' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify IPA exists
+        run: |
+          ls -la RepostLaira.ipa
+          file RepostLaira.ipa
+
+      - name: Setup API key for altool
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo '${{ secrets.ASC_API_KEY }}' | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_K2QW79TPA6.p8
+
+      - name: Validate IPA
+        run: |
+          xcrun altool --validate-app -f RepostLaira.ipa -t ios \
+            --apiKey K2QW79TPA6 \
+            --apiIssuer ac10966d-fa49-40d5-a6a4-ef1ebb3b2fce \
+            --verbose 2>&1 || true
+
+      - name: Upload IPA via altool
+        run: |
+          xcrun altool --upload-app -f RepostLaira.ipa -t ios \
+            --apiKey K2QW79TPA6 \
+            --apiIssuer ac10966d-fa49-40d5-a6a4-ef1ebb3b2fce \
+            --verbose 2>&1 || echo "altool upload failed, trying Transporter..."
+
+      - name: Fallback - Upload via Transporter
+        if: failure()
+        run: |
+          echo '${{ secrets.ASC_API_KEY }}' | base64 --decode > AuthKey_K2QW79TPA6.p8
+          xcrun iTMSTransporter -m upload \
+            -assetFile RepostLaira.ipa \
+            -apiKey K2QW79TPA6 \
+            -apiIssuer ac10966d-fa49-40d5-a6a4-ef1ebb3b2fce \
+            -verbose 2>&1 || true

@@ -2,7 +2,7 @@
   "expo": {
     "name": "RepostLaira",
     "slug": "repostlaira",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "scheme": "repostlaira",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

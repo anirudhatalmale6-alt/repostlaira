@@ -70,6 +70,10 @@ export default function SettingsScreen() {
     Linking.openURL('mailto:support@lairaboost.com?subject=RepostLaira%20-%20Support');
   }, []);
 
+  const handleUpgrade = useCallback(() => {
+    Linking.openURL('https://repost.arialtravel.com/app/?src=app#tarifs');
+  }, []);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -89,9 +93,9 @@ export default function SettingsScreen() {
           </View>
           <Text style={styles.premiumTitle}>RepostLaira Premium</Text>
           <Text style={styles.premiumDesc}>
-            Telechargements illimites, sans publicites, qualite maximale et support prioritaire.
+            Reposts illimites, sans publicites, qualite maximale et support prioritaire.
           </Text>
-          <TouchableOpacity style={styles.premiumBtn} activeOpacity={0.8}>
+          <TouchableOpacity style={styles.premiumBtn} activeOpacity={0.8} onPress={handleUpgrade}>
             <Text style={styles.premiumBtnText}>Passer a Premium</Text>
           </TouchableOpacity>
         </View>

@@ -1,36 +1,36 @@
 PLAY STORE LISTING - RepostLaira
 ================================
 
-TITRE: RepostLaira - Telecharger Videos
-SOUS-TITRE: Telecharger TikTok, Instagram, YouTube sans filigrane
+TITRE: RepostLaira - Repost & Partage
+SOUS-TITRE: Republiez et reformatez vos videos pour vos reseaux
 
 DESCRIPTION COURTE (80 caracteres max):
-Telechargez vos videos TikTok, Instagram, YouTube en haute qualite sans filigrane
+Reformatez et republiez vos propres videos sur vos reseaux sociaux facilement
 
 DESCRIPTION COMPLETE:
-RepostLaira est l'application ultime pour telecharger et sauvegarder vos videos preferees depuis TikTok, Instagram, YouTube, Twitter et Facebook.
+RepostLaira vous aide a republier et reformater vos contenus video pour les partager sur vos reseaux sociaux : TikTok, Instagram, YouTube, Twitter et Facebook.
 
 FONCTIONNALITES PRINCIPALES :
-- Telechargement sans filigrane depuis 5 plateformes
+- Reformatage aux bons formats (9:16, 1:1) pour chaque reseau
 - Qualite HD jusqu'a 1080p
-- Telechargement rapide et fiable
-- Interface simple : collez le lien, telechargez
-- Historique de vos telechargements
-- Mode Premium pour des telechargements illimites
+- Partage rapide vers l'application de votre choix
+- Historique de vos reposts
+- Mode Premium pour un usage illimite
 
 COMMENT CA MARCHE :
-1. Copiez le lien de la video depuis TikTok, Instagram, YouTube, Twitter ou Facebook
-2. Collez-le dans RepostLaira
-3. Choisissez la qualite souhaitee
-4. Telechargez et sauvegardez dans votre galerie
+1. Ouvrez votre contenu depuis l'application source et utilisez "Partager vers RepostLaira", ou importez-le depuis votre galerie
+2. Choisissez le format et la qualite
+3. Enregistrez-le dans votre galerie ou partagez-le directement
+
+Vous ne republiez que des contenus dont vous disposez des droits.
 
 GRATUIT AVEC COINS :
 - 10 coins offerts chaque jour
-- 1 telechargement = 1 coin
+- 1 repost = 1 coin
 - Achetez des packs supplementaires si besoin
 
 PREMIUM (4,99 EUR/mois) :
-- Telechargements illimites
+- Reposts illimites
 - Qualite maximale HD
 - Sans publicites
 - Support prioritaire
@@ -48,27 +48,28 @@ APP STORE LISTING - RepostLaira
 ================================
 
 NOM: RepostLaira
-SOUS-TITRE: Videos sans filigrane
+SOUS-TITRE: Repost et partage video
 CATEGORIE: Utilitaires
-MOTS-CLES: telecharger,video,tiktok,instagram,youtube,repost,sauvegarder,filigrane,hd
+MOTS-CLES: repost,video,partage,reformater,reseaux,tiktok,instagram,galerie,hd
 
 DESCRIPTION:
-RepostLaira vous permet de telecharger facilement vos videos preferees depuis TikTok, Instagram, YouTube, Twitter et Facebook, en haute qualite et sans filigrane.
+RepostLaira vous aide a republier et reformater vos propres contenus video pour les partager sur vos reseaux sociaux.
 
-Collez simplement le lien de la video, choisissez la qualite, et sauvegardez-la dans votre galerie. C'est aussi simple que ca.
+Importez une video depuis votre galerie ou envoyez-la vers RepostLaira via le bouton Partager de l'application source, choisissez le format adapte au reseau, puis enregistrez-la dans votre galerie ou partagez-la directement.
 
 Fonctionnalites :
-- Support de 5 plateformes (TikTok, Instagram, YouTube, Twitter, Facebook)
-- Telechargement en qualite HD
-- Sans filigrane
-- Rapide et fiable
-- Historique des telechargements
+- Reformatage aux formats reseaux (9:16, 1:1)
+- Qualite HD
+- Partage direct vers l'application de votre choix
+- Historique de vos reposts
 - Systeme de coins (10 gratuits par jour)
-- Mode Premium pour un acces illimite
+- Mode Premium pour un usage illimite
+
+Vous ne republiez que des contenus dont vous disposez des droits.
 
 Abonnement Premium :
 - 4,99 EUR/mois avec renouvellement automatique
-- Telechargements illimites, qualite HD max, sans pubs
+- Reposts illimites, qualite HD max, sans pubs
 - Le paiement est preleve sur votre compte iTunes
 - L'abonnement se renouvelle automatiquement sauf annulation au moins 24h avant la fin de la periode en cours
 
@@ -77,4 +78,4 @@ Liens utiles :
 - Conditions d'utilisation : https://repost.arialtravel.com/app/cgu.html
 
 TEXTE PROMOTIONNEL (170 car):
-Telechargez vos videos TikTok, Instagram et YouTube sans filigrane en un clic. 10 coins gratuits par jour!
+Republiez et reformatez vos videos pour TikTok, Instagram et YouTube en un geste. 10 coins gratuits par jour !

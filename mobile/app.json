@@ -19,8 +19,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.lairaboost.repostlaira",
       "infoPlist": {
-        "NSPhotoLibraryAddUsageDescription": "RepostLaira a besoin d'acceder a votre galerie pour enregistrer les medias telecharges.",
-        "NSPhotoLibraryUsageDescription": "RepostLaira a besoin d'acceder a votre galerie pour enregistrer les medias telecharges.",
+        "NSPhotoLibraryAddUsageDescription": "RepostLaira a besoin d'acceder a votre galerie pour importer et enregistrer vos videos.",
+        "NSPhotoLibraryUsageDescription": "RepostLaira a besoin d'acceder a votre galerie pour importer et enregistrer vos videos.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },

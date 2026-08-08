@@ -1,0 +1,1 @@
+Sign in with the demo account (pre-filled). ClipFlare is the mobile client for the ClipFlare studio (clipflare.ai): paste a video link or pick a file, the app cuts it into short vertical subtitled clips, and you can schedule or post them. The demo account has credits so you can run a full clip generation.

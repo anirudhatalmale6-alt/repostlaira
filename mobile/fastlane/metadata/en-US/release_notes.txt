@@ -1,0 +1,1 @@
+First ClipFlare release: turn long videos into short, subtitled, ready-to-post clips.

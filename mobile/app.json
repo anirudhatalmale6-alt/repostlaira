@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.lairaboost.repostlaira",
-      "buildNumber": "20",
+      "buildNumber": "21",
       "infoPlist": {
         "NSPhotoLibraryAddUsageDescription": "ClipFlare a besoin d'acceder a votre galerie pour importer et enregistrer vos videos.",
         "NSPhotoLibraryUsageDescription": "ClipFlare a besoin d'acceder a votre galerie pour importer vos videos.",
@@ -50,13 +50,6 @@
           "photosPermission": "ClipFlare a besoin d'acceder a vos photos pour importer et enregistrer des videos.",
           "savePhotosPermission": "ClipFlare a besoin de sauvegarder des videos dans votre galerie.",
           "isAccessMediaLocationEnabled": true
-        }
-      ],
-      [
-        "react-native-google-mobile-ads",
-        {
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
-          "iosAppId": "ca-app-pub-3940256099942544~1458002511"
         }
       ]
     ],

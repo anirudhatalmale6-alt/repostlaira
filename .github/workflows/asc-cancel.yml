@@ -1,0 +1,28 @@
+name: ASC Cancel Stuck Submission
+on: workflow_dispatch
+jobs:
+  cancel:
+    runs-on: macos-latest
+    steps:
+      - name: Cancel in-progress review submissions
+        run: |
+          echo '${{ secrets.ASC_API_KEY }}' | base64 --decode > AuthKey.p8
+          python3 -m pip install --break-system-packages --quiet pyjwt cryptography requests
+          python3 - << 'PY'
+          import jwt, time, requests
+          KEY_ID="K2QW79TPA6"; ISS="ac10966d-fa49-40d5-a6a4-ef1ebb3b2fce"; APP="6772851563"
+          key=open("AuthKey.p8").read()
+          tok=jwt.encode({"iss":ISS,"iat":int(time.time()),"exp":int(time.time())+1200,"aud":"appstoreconnect-v1"},
+                         key, algorithm="ES256", headers={"kid":KEY_ID,"typ":"JWT"})
+          H={"Authorization":"Bearer "+tok,"Content-Type":"application/json"}
+          B="https://api.appstoreconnect.apple.com/v1"
+          r=requests.get(f"{B}/reviewSubmissions",headers=H,params={"filter[app]":APP,"limit":20})
+          CANCELABLE={"UNRESOLVED_ISSUES","READY_FOR_REVIEW","WAITING_FOR_REVIEW"}
+          for s in r.json().get("data",[]):
+              sid=s["id"]; st=s["attributes"].get("state")
+              print("submission",sid,st)
+              if st in CANCELABLE:
+                  pr=requests.patch(f"{B}/reviewSubmissions/{sid}",headers=H,
+                      json={"data":{"type":"reviewSubmissions","id":sid,"attributes":{"canceled":True}}})
+                  print("  cancel ->",pr.status_code, pr.text[:160])
+          PY

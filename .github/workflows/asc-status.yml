@@ -1,0 +1,30 @@
+name: ASC Status
+on: workflow_dispatch
+jobs:
+  status:
+    runs-on: macos-latest
+    steps:
+      - name: Query App Store Connect
+        run: |
+          echo '${{ secrets.ASC_API_KEY }}' | base64 --decode > AuthKey.p8
+          python3 -m pip install --quiet pyjwt cryptography requests
+          python3 - << 'PY'
+          import jwt, time, requests, json
+          KEY_ID="K2QW79TPA6"; ISS="ac10966d-fa49-40d5-a6a4-ef1ebb3b2fce"; APP="6772851563"
+          key=open("AuthKey.p8").read()
+          tok=jwt.encode({"iss":ISS,"iat":int(time.time()),"exp":int(time.time())+1200,"aud":"appstoreconnect-v1"},
+                         key, algorithm="ES256", headers={"kid":KEY_ID,"typ":"JWT"})
+          H={"Authorization":"Bearer "+tok}
+          B="https://api.appstoreconnect.apple.com/v1"
+          print("=== appStoreVersions ===")
+          r=requests.get(f"{B}/apps/{APP}/appStoreVersions",headers=H,params={"limit":10})
+          for v in r.json().get("data",[]):
+              a=v["attributes"]; print(v["id"], a.get("versionString"), a.get("appStoreState"), a.get("platform"))
+          print("=== reviewSubmissions ===")
+          r=requests.get(f"{B}/reviewSubmissions",headers=H,params={"filter[app]":APP,"limit":10})
+          for s in r.json().get("data",[]):
+              a=s["attributes"]; print(s["id"], a.get("state"), a.get("platform"), a.get("submittedDate"))
+          print("=== apps (name) ===")
+          r=requests.get(f"{B}/apps/{APP}",headers=H)
+          print(json.dumps(r.json().get("data",{}).get("attributes",{}),indent=1)[:500])
+          PY

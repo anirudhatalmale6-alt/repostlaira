@@ -1,0 +1,45 @@
+name: iOS Store Metadata + Submit
+on:
+  workflow_dispatch:
+    inputs:
+      submit:
+        description: 'Submit for review (true) or upload metadata only (false)'
+        required: false
+        default: 'false'
+
+jobs:
+  deliver:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare App Store Connect API key
+        run: |
+          echo '${{ secrets.ASC_API_KEY }}' | base64 --decode > AuthKey_K2QW79TPA6.p8
+          cat > asc_api_key.json << 'EOF'
+          {
+            "key_id": "K2QW79TPA6",
+            "issuer_id": "ac10966d-fa49-40d5-a6a4-ef1ebb3b2fce",
+            "key_filepath": "AuthKey_K2QW79TPA6.p8",
+            "in_house": false
+          }
+          EOF
+
+      - name: fastlane deliver
+        run: |
+          fastlane deliver \
+            --api_key_path ./asc_api_key.json \
+            --app_identifier com.lairaboost.repostlaira \
+            --app_version 2.0.0 \
+            --skip_binary_upload true \
+            --submit_for_review ${{ github.event.inputs.submit }} \
+            --automatic_release false \
+            --force true \
+            --run_precheck_before_submit false \
+            --precheck_include_in_app_purchases false \
+            --metadata_path ./fastlane/metadata \
+            --screenshots_path ./fastlane/screenshots \
+            --submission_information '{"export_compliance_uses_encryption": false, "add_id_info_uses_idfa": false}'
